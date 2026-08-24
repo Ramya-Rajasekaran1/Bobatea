@@ -100,13 +100,13 @@
       transition: width 0.4s ease-out;
     }
     
-    /* SHINY HORIZONTAL FLOWING LINES CANVAS */
+    /* BACKGROUND CANVAS FOR FLOW LINES AND LIQUID PHYSICS DROPLETS */
     #flow-canvas {
       position: fixed;
       inset: 0;
       width: 100vw;
       height: 100vh;
-      z-index: 0; /* Sits in background behind video card */
+      z-index: 0; /* In background behind video viewport */
       pointer-events: auto; /* Active pointer-events for physics droplet slicing */
       background-color: #000000;
     }
@@ -213,6 +213,7 @@
       position: relative;
       transform-style: preserve-3d;
       opacity: 0; /* Hidden initially in Hero Section */
+      cursor: pointer; /* Click to step deconstruction phases */
       
       /* Glass Black Box Styling */
       border-radius: 20px;
@@ -233,12 +234,18 @@
       display: block;
     }
     
-    /* FLOATING INTERACTIVE ANNOTATIONS SYSTEM */
+    /* FLOATING INTERACTIVE ANNOTATIONS SYSTEM (Phase 4 / Labeled) */
     .annotations-overlay {
       position: absolute;
       inset: 0;
       pointer-events: none;
-      z-index: 10;
+      z-index: 15;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    
+    .annotations-overlay.active {
+      opacity: 1;
     }
     
     .annotation-item {
@@ -457,6 +464,145 @@
       font-weight: 300;
     }
     
+    /* PHASE EXPLORER BANNER OVERLAY */
+    .phase-explorer-banner {
+      position: absolute;
+      top: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      background: rgba(10, 10, 10, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(223, 188, 138, 0.25);
+      border-radius: 30px;
+      padding: 0.5rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    
+    .phase-explorer-banner.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .explorer-hint {
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--gold-dark);
+      font-weight: 600;
+    }
+    
+    .phase-ticks {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .phase-tick-item {
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.45);
+      cursor: pointer;
+      padding: 0.25rem 0.6rem;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+    }
+    
+    .phase-tick-item.active {
+      color: var(--gold);
+      border-color: rgba(223, 188, 138, 0.35);
+      background: rgba(223, 188, 138, 0.08);
+    }
+    
+    /* EXPLODED LAYER BLUEPRINT & TECHNICAL OVERLAYS (Images 3 & 4) */
+    .blueprint-overlay, .technical-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 10;
+      transition: opacity 0.5s ease;
+    }
+    
+    .blueprint-overlay.active, .technical-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .pointer-line {
+      position: absolute;
+      height: 1px;
+      background: linear-gradient(to right, rgba(255,255,255,0.0), rgba(255,255,255,0.6));
+      width: 0;
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .blueprint-overlay.active .pointer-line,
+    .technical-overlay.active .pointer-line {
+      width: 22%; /* Connecting lines expand */
+    }
+    
+    .pointer-label {
+      position: absolute;
+      color: #ffffff;
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0;
+      transform: translateX(10px);
+      transition: opacity 0.5s ease 0.3s, transform 0.5s ease 0.3s;
+      white-space: nowrap;
+    }
+    
+    .blueprint-overlay.active .pointer-label,
+    .technical-overlay.active .pointer-label {
+      opacity: 0.85;
+      transform: translateX(0);
+    }
+    
+    /* Vertical ruler axis style for Technical Overlay (Image 4) */
+    .ruler-axis {
+      position: absolute;
+      left: 8%;
+      top: 15%;
+      bottom: 12%;
+      width: 1px;
+      background: rgba(255, 255, 255, 0.25);
+    }
+    
+    .ruler-tick {
+      position: absolute;
+      left: -4px;
+      width: 9px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.4);
+    }
+    
+    .ruler-label {
+      position: absolute;
+      left: -26px;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.6rem;
+      font-weight: 600;
+      width: 18px;
+      height: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000000;
+    }
+    
     /* KEYFRAMES */
     @keyframes fadeInUp {
       to {
@@ -508,6 +654,9 @@
         padding-right: 1.5rem;
         padding-bottom: 0;
       }
+      .pointer-line { display: none !important; } /* Hide lines on tablet/mobile to preserve space */
+      .pointer-label { left: auto !important; right: 10px !important; }
+      .ruler-axis { left: 4%; }
     }
     
     @media (max-width: 600px) {
@@ -533,6 +682,12 @@
         max-width: 92%;
         padding: 1.5rem 1.8rem;
       }
+      .phase-explorer-banner {
+        padding: 0.4rem 0.8rem;
+        gap: 0.5rem;
+        width: 90%;
+      }
+      .explorer-hint { display: none; }
     }
   </style>
 </head>
@@ -558,8 +713,74 @@
         <!-- Keyframe-optimized watermark-free taro deconstruction video -->
         <video id="scrub-video" src="clean_video.mp4" playsinline muted preload="auto"></video>
         
-        <!-- Absolute Interactive Annotation Elements -->
-        <div class="annotations-overlay">
+        <!-- Interactive Phase Indicator Overlay (visible when scrolled down) -->
+        <div class="phase-explorer-banner" id="phase-banner">
+          <span class="explorer-hint">Click card to dissect:</span>
+          <div class="phase-ticks" id="phase-ticks-container">
+            <span class="phase-tick-item active" data-phase="1">Assembled</span>
+            <span class="phase-tick-item" data-phase="2">Deconstructing</span>
+            <span class="phase-tick-item" data-phase="3">Blueprint</span>
+            <span class="phase-tick-item" data-phase="4">Technical</span>
+          </div>
+        </div>
+
+        <!-- PHASE 3: Exploded Layer Blueprint Overlay (Image 3) -->
+        <div class="blueprint-overlay" id="blueprint-layer">
+          <div class="pointer-line" style="top: 18%; left: 56%;"></div>
+          <span class="pointer-label" style="top: 18%; left: 78%;">5. Metallic Boba Straw</span>
+
+          <div class="pointer-line" style="top: 32%; left: 52%;"></div>
+          <span class="pointer-label" style="top: 32%; left: 78%;">4. Whipped Cream Swirl</span>
+
+          <div class="pointer-line" style="top: 50%; left: 48%;"></div>
+          <span class="pointer-label" style="top: 50%; left: 78%;">3. Rich Taro Milkshake & Splashes</span>
+
+          <div class="pointer-line" style="top: 68%; left: 45%;"></div>
+          <span class="pointer-label" style="top: 68%; left: 78%;">2. Tapioca Boba Pearls</span>
+
+          <div class="pointer-line" style="top: 85%; left: 48%;"></div>
+          <span class="pointer-label" style="top: 85%; left: 78%;">1. Transparent Glass Cup</span>
+        </div>
+
+        <!-- PHASE 4: Labeled Technical Axis Overlay (Image 4) -->
+        <div class="technical-overlay" id="technical-layer">
+          <!-- Left side vertical axis ruler scale -->
+          <div class="ruler-axis">
+            <div class="ruler-tick" style="top: 18%;"></div>
+            <div class="ruler-label" style="top: 18%;">E</div>
+
+            <div class="ruler-tick" style="top: 32%;"></div>
+            <div class="ruler-label" style="top: 32%;">D</div>
+
+            <div class="ruler-tick" style="top: 50%;"></div>
+            <div class="ruler-label" style="top: 50%;">C</div>
+
+            <div class="ruler-tick" style="top: 68%;"></div>
+            <div class="ruler-label" style="top: 68%;">B</div>
+
+            <div class="ruler-tick" style="top: 85%;"></div>
+            <div class="ruler-label" style="top: 85%;">A</div>
+          </div>
+
+          <!-- Right side pointer lines and labels -->
+          <div class="pointer-line" style="top: 18%; left: 56%;"></div>
+          <span class="pointer-label" style="top: 18%; left: 78%;">Stainless Steel Straw (E)</span>
+
+          <div class="pointer-line" style="top: 32%; left: 52%;"></div>
+          <span class="pointer-label" style="top: 32%; left: 78%;">Sculpted Whipped Cream (D)</span>
+
+          <div class="pointer-line" style="top: 50%; left: 48%;"></div>
+          <span class="pointer-label" style="top: 50%; left: 78%;">Frozen Milkshake Explosion (C)</span>
+
+          <div class="pointer-line" style="top: 68%; left: 45%;"></div>
+          <span class="pointer-label" style="top: 68%; left: 78%;">Tapioca Pearls (B)</span>
+
+          <div class="pointer-line" style="top: 85%; left: 48%;"></div>
+          <span class="pointer-label" style="top: 85%; left: 78%;">Glass Base (A)</span>
+        </div>
+        
+        <!-- Absolute Interactive Annotation Elements (Visible in Phase 4 / Labeled) -->
+        <div class="annotations-overlay" id="interactive-annotations">
           
           <!-- Whipped Cream Layer (Active: 0.0s - 1.2s) -->
           <div class="annotation-item" id="annotation-cream" data-start="0.0" data-end="1.2">
@@ -819,30 +1040,6 @@
         this.vx *= 0.99;
         this.vy *= 0.99;
         
-        // Center text exclusion zone (ellipse repulsion to keep brand title clean)
-        const centerX = width / 2;
-        const centerY = height / 2;
-        const rx = 280; // horizontal radius of exclusion ellipse
-        const ry = 100; // vertical radius of exclusion ellipse
-        const tDx = this.x - centerX;
-        const tDy = this.y - centerY;
-        const distRatio = (tDx * tDx) / (rx * rx) + (tDy * tDy) / (ry * ry);
-        
-        if (distRatio < 1.0) {
-          const angle = Math.atan2(tDy * rx, tDx * ry);
-          const pushForce = (1.0 - distRatio) * 0.12; // gentle push outwards
-          this.vx += Math.cos(angle) * pushForce;
-          this.vy += Math.sin(angle) * pushForce;
-        }
-
-        // Right-side details card exclusion zone (active when scrolling)
-        if (window.scrollY > 2) {
-          const rightBoundary = width * 0.65;
-          if (this.x > rightBoundary) {
-            this.vx -= (this.x - rightBoundary) * 0.02; // push away from right side
-          }
-        }
-        
         // Handle bounding box reflections (only active when scrolled all the way up, window.scrollY < 2)
         const isAllWayUp = window.scrollY < 2;
         if (isAllWayUp) {
@@ -967,7 +1164,7 @@
       
       const scrollSpeedBoost = 1 + (window.scrollY * 0.002);
       
-      // 1. DRAW SUBTLE TRANSLUCENT BACKGROUND FLOW LINES (At 20% opacity)
+      // 1. DRAW SUBTLE TRANSLUCENT BACKGROUND FLOW LINES (At 50% opacity)
       const lineGrad = ctx.createLinearGradient(0, 0, width, 0);
       lineGrad.addColorStop(0, '#8a6f27');
       lineGrad.addColorStop(0.2, '#dfbc8a');
@@ -980,7 +1177,7 @@
         line.phase += line.speed * scrollSpeedBoost;
         
         ctx.save();
-        ctx.globalAlpha = line.opacity; // Applies the 20% opacity to the specular gradient stroke
+        ctx.globalAlpha = line.opacity; // Applies the 50% opacity to the specular gradient stroke
         
         ctx.beginPath();
         ctx.strokeStyle = lineGrad;
@@ -1055,9 +1252,21 @@
     const logoLink = document.querySelector('.logo');
     const pages = document.querySelectorAll('.page-content');
     
+    // Interactive Overlays
+    const phaseBanner = document.getElementById('phase-banner');
+    const blueprintLayer = document.getElementById('blueprint-layer');
+    const technicalLayer = document.getElementById('technical-layer');
+    const interactiveAnnotations = document.getElementById('interactive-annotations');
+    const phaseTicks = document.querySelectorAll('.phase-tick-item');
+    
     let targetTime = 0;
     let currentTime = 0;
     const lerpFactor = 0.07;
+    
+    // Deconstruction Interactive Phases States
+    let currentPhase = 1; // 1: Assembled, 2: Deconstructing, 3: Blueprint, 4: Technical
+    let manualPhaseMode = false; // Flag set true when user manually selects phases via click
+    let lastScrollY = window.scrollY;
     
     function initScrollEngine() {
       video.pause();
@@ -1068,6 +1277,13 @@
     
     function handleScroll() {
       if (!video.duration) return;
+      
+      const scrollY = window.scrollY;
+      // If user scrolls physically by a threshold, drop manual phase click-mode to resume scroll tracking
+      if (manualPhaseMode && Math.abs(scrollY - lastScrollY) > 15) {
+        manualPhaseMode = false;
+      }
+      lastScrollY = scrollY;
       
       const rect = scrollSection.getBoundingClientRect();
       const totalScrollableHeight = rect.height - window.innerHeight;
@@ -1081,35 +1297,76 @@
         scrollHint.classList.remove('hide');
       }
       
-      // Reverse scroll scrubbing mapping
-      targetTime = (1 - scrollPct) * video.duration;
+      // Update phase explorer bar visibility
+      if (scrollPct > 0.22) {
+        phaseBanner.classList.add('visible');
+      } else {
+        phaseBanner.classList.remove('visible');
+        if (!manualPhaseMode) {
+          // Force reset overlays when back in Hero area
+          blueprintLayer.classList.remove('active');
+          technicalLayer.classList.remove('active');
+          interactiveAnnotations.classList.remove('active');
+        }
+      }
       
-      // 3A. STRICT SEQUENTIAL HERO TRANSITION (No overlap guaranteed)
+      // If not in manual click explore mode, drive video time & active layers by scroll position
+      if (!manualPhaseMode) {
+        // Reverse scroll scrubbing mapping:
+        // scrollPct 0.0 -> Assembled (video duration ~5.04s)
+        // scrollPct 1.0 -> Fully Exploded (video time 0.0s)
+        targetTime = (1 - scrollPct) * video.duration;
+        
+        // Dynamically auto-toggle layout overlays based on scroll bounds
+        if (scrollPct < 0.20) {
+          // Hero centerpiece title fade-out
+          blueprintLayer.classList.remove('active');
+          technicalLayer.classList.remove('active');
+          interactiveAnnotations.classList.remove('active');
+          updateActivePhaseTick(1);
+        } else if (scrollPct >= 0.20 && scrollPct < 0.55) {
+          // Velvet Fusion deconstruction splash phase
+          blueprintLayer.classList.remove('active');
+          technicalLayer.classList.remove('active');
+          interactiveAnnotations.classList.remove('active');
+          updateActivePhaseTick(2);
+        } else if (scrollPct >= 0.55 && scrollPct < 0.85) {
+          // Starch meets Flora layer exploded blueprint phase
+          blueprintLayer.classList.add('active');
+          technicalLayer.classList.remove('active');
+          interactiveAnnotations.classList.remove('active');
+          updateActivePhaseTick(3);
+        } else if (scrollPct >= 0.85) {
+          // Pure Elements fully annotated technical phase
+          blueprintLayer.classList.remove('active');
+          technicalLayer.classList.add('active');
+          interactiveAnnotations.classList.add('active');
+          updateActivePhaseTick(4);
+        }
+      }
+      
+      // 3A. HERO TEXT SEQUENTIAL TRANSITION
       let videoOpacity = 0;
       let brandOpacity = 1;
       let brandTranslateY = 0;
       
-      // 1. Text and ingredients fade out completely between scrollPct 0.0 and 0.15
       if (scrollPct < 0.15) {
         brandOpacity = 1 - (scrollPct / 0.15);
         brandTranslateY = -scrollPct * 150;
-        videoOpacity = 0; // Strictly ensure video is invisible while text is fading
-        
-        globalDropletsOpacity = 1 - (scrollPct / 0.15); // Fade droplets out on scroll
+        videoOpacity = 0;
+        globalDropletsOpacity = 1 - (scrollPct / 0.15);
       } else {
         brandOpacity = 0;
         brandTranslateY = -150;
         videoOpacity = 0;
-        
-        globalDropletsOpacity = 0; // Completely dissolved
+        globalDropletsOpacity = 0;
       }
       
-      // 2. Video glass card only starts showing up AFTER text is completely gone (from 0.20 to 0.40)
       if (scrollPct > 0.20) {
         videoOpacity = (scrollPct - 0.20) / 0.20;
         videoOpacity = Math.max(0, Math.min(1, videoOpacity));
       } else {
-        videoOpacity = 0; // Gap between 0.15 and 0.20 shows only empty black screen + lines
+        videoOpacity = 0;
       }
       
       videoCard.style.opacity = videoOpacity;
@@ -1162,6 +1419,70 @@
       });
     }
     
+    // 5. INTERACTIVE PHASE MANAGER (Click-To-Step deconstruction workflow)
+    function setPhase(phase) {
+      if (!video.duration) return;
+      currentPhase = phase;
+      manualPhaseMode = true;
+      updateActivePhaseTick(phase);
+      
+      // Deconstruction Phase configurations matching user's reference images
+      if (phase === 1) {
+        // Image 1: Full glass assembled
+        targetTime = video.duration;
+        blueprintLayer.classList.remove('active');
+        technicalLayer.classList.remove('active');
+        interactiveAnnotations.classList.remove('active');
+      } else if (phase === 2) {
+        // Image 2: Deconstructing splash explosion
+        targetTime = video.duration * 0.55; // Splash frame middle
+        blueprintLayer.classList.remove('active');
+        technicalLayer.classList.remove('active');
+        interactiveAnnotations.classList.remove('active');
+      } else if (phase === 3) {
+        // Image 3: Exploded Layer Blueprint
+        targetTime = 0.05; // Separated layers frame near start
+        blueprintLayer.classList.add('active');
+        technicalLayer.classList.remove('active');
+        interactiveAnnotations.classList.remove('active');
+      } else if (phase === 4) {
+        // Image 4: Technical axis details with annotations
+        targetTime = 0.05; // Keep exploded layer frame
+        blueprintLayer.classList.remove('active');
+        technicalLayer.classList.add('active');
+        interactiveAnnotations.classList.add('active'); // Fade in annotation dots
+      }
+    }
+    
+    function updateActivePhaseTick(phase) {
+      phaseTicks.forEach(item => {
+        if (parseInt(item.getAttribute('data-phase')) === phase) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    }
+    
+    // Click card wrapper to cycle through deconstruction phases
+    videoCard.addEventListener('click', (e) => {
+      // Don't cycle if click target is a tick item or marker dot
+      if (e.target.closest('.phase-tick-item') || e.target.closest('.marker-dot') || e.target.closest('.annotation-card')) {
+        return;
+      }
+      let nextPhase = (currentPhase % 4) + 1;
+      setPhase(nextPhase);
+    });
+    
+    // Phase Banner ticks click listener
+    phaseTicks.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetPhase = parseInt(item.getAttribute('data-phase'));
+        setPhase(targetPhase);
+      });
+    });
+    
     if (video.readyState >= 1) {
       initScrollEngine();
     } else {
@@ -1176,8 +1497,6 @@
         behavior: 'smooth'
       });
     });
-    
-    // 5. 3D VIEWPORT PARALLAX HOVER TILT - REMOVED TO KEEP CARD CONTAINER STRAIGHT
 
     // Marker dots event bounds
     annotationItems.forEach(item => {
