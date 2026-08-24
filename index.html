@@ -100,13 +100,13 @@
       transition: width 0.4s ease-out;
     }
     
-    /* BACKGROUND CANVAS FOR FLOW LINES AND LIQUID PHYSICS DROPLETS */
+    /* SHINY HORIZONTAL FLOWING LINES CANVAS */
     #flow-canvas {
       position: fixed;
       inset: 0;
       width: 100vw;
       height: 100vh;
-      z-index: 0; /* In background behind video viewport */
+      z-index: 0; /* Sits in background behind video card */
       pointer-events: auto; /* Active pointer-events for physics droplet slicing */
       background-color: #000000;
     }
@@ -199,7 +199,7 @@
       align-items: center;
       pointer-events: none;
       padding-top: var(--header-height);
-      padding-bottom: 0;
+      padding-bottom: 13rem; /* Leave room to prevent overlap with bottom centered detail cards */
       padding-left: 2rem;
       padding-right: 2rem;
     }
@@ -207,8 +207,8 @@
     .video-container-3d {
       width: 100%;
       aspect-ratio: 1284 / 716;
-      max-width: calc((100vh - var(--header-height)) * 1284 / 716);
-      max-height: calc(100vh - var(--header-height));
+      max-width: calc((100vh - var(--header-height) - 13rem) * 1284 / 716);
+      max-height: calc(100vh - var(--header-height) - 13rem);
       background-color: #000000;
       position: relative;
       transform-style: preserve-3d;
@@ -388,25 +388,21 @@
       pointer-events: none;
     }
     
-    /* SCROLL TRACK OVERLAY PAGES (Alternate Left and Right alignment) */
+    /* SCROLL TRACK OVERLAY PAGES (Aligned to Bottom Center) */
     .scroll-page {
       height: 100vh;
       width: 100%;
       display: flex;
-      align-items: center;
-      padding: 0 8%;
+      align-items: flex-end; /* Align detail cards to bottom */
+      justify-content: center; /* Center horizontally */
+      padding-bottom: 2.5rem; /* Spacing from screen bottom */
       pointer-events: none;
     }
     
-    /* Alternate slides placement on side edges */
-    #page-1 { justify-content: center; } /* Hero slide holds empty spacer */
-    #page-2 { justify-content: flex-start; } /* Velvet Fusion (left) */
-    #page-3 { justify-content: flex-end; }   /* Starch meets Flora (right) */
-    #page-4 { justify-content: flex-start; } /* Pure Elements (left) */
-    
     .page-content {
-      max-width: 420px;
-      padding: 2.5rem 3rem;
+      width: 100%;
+      max-width: 580px; /* Slightly wider elegant centered card */
+      padding: 2.2rem 2.8rem;
       background: rgba(10, 10, 10, 0.45); /* Translucent glass card background */
       backdrop-filter: blur(25px) saturate(160%); /* Glossy Glassmorphism */
       -webkit-backdrop-filter: blur(25px) saturate(160%);
@@ -440,11 +436,11 @@
     
     .page-title {
       font-family: var(--font-body);
-      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      font-size: clamp(1.8rem, 3vw, 2.3rem);
       font-weight: 500;
       line-height: 1.2;
       color: var(--text-main);
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.2rem;
       letter-spacing: 0.02em;
       text-transform: uppercase;
     }
@@ -492,17 +488,17 @@
     
     /* RESPONSIVE LAYOUTS */
     @media (max-width: 900px) {
-      .scroll-page {
-        justify-content: center !important;
-        padding: 0 1.5rem;
-      }
       .page-content {
         max-width: 90%;
         padding: 2rem;
       }
       header { padding: 1.5rem; }
       .annotation-card { width: 200px; padding: 0.8rem 1rem; }
-      .video-perspective-wrapper { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .video-perspective-wrapper {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+        padding-bottom: 12rem;
+      }
     }
     
     @media (max-width: 600px) {
@@ -518,7 +514,19 @@
       .annotation-card { width: 155px; padding: 0.6rem 0.8rem; }
       .card-title { font-size: 0.85rem; }
       .card-text { font-size: 0.7rem; }
-      .video-perspective-wrapper { padding-left: 1rem; padding-right: 1rem; }
+      
+      .video-perspective-wrapper {
+        padding-left: 1rem;
+        padding-right: 1rem;
+        padding-bottom: 11rem; /* Adjust padding-bottom for mobile layout */
+      }
+      .scroll-page {
+        padding-bottom: 1.5rem;
+      }
+      .page-content {
+        max-width: 92%;
+        padding: 1.5rem 1.8rem;
+      }
     }
   </style>
 </head>
@@ -893,7 +901,7 @@
           this.y, 
           this.radius
         );
-        grad.addColorStop(0, `rgba(255, 255, 255, ${globalDropletsOpacity})`); // Speclar shine white
+        grad.addColorStop(0, `rgba(255, 255, 255, ${globalDropletsOpacity})`); // Specular shine white
         grad.addColorStop(0.25, `rgba(243, 229, 171, ${globalDropletsOpacity})`); // Light cream gold
         grad.addColorStop(0.7, `rgba(223, 188, 138, ${globalDropletsOpacity})`); // Gold
         grad.addColorStop(1, `rgba(138, 111, 39, ${globalDropletsOpacity})`); // Dark bronze gold edge
@@ -935,7 +943,7 @@
       
       const scrollSpeedBoost = 1 + (window.scrollY * 0.002);
       
-      // 1. DRAW SUBTLE TRANSLUCENT BACKGROUND FLOW LINES
+      // 1. DRAW SUBTLE TRANSLUCENT BACKGROUND FLOW LINES (At 20% opacity)
       const lineGrad = ctx.createLinearGradient(0, 0, width, 0);
       lineGrad.addColorStop(0, '#8a6f27');
       lineGrad.addColorStop(0.2, '#dfbc8a');
@@ -973,7 +981,6 @@
       });
       
       // 2. DRAW & MERGE METABALLS PHYSICS DROPLETS
-      // Double loop collision check to merge droplets
       for (let i = 0; i < droplets.length; i++) {
         const d1 = droplets[i];
         if (!d1.active) continue;
@@ -1079,7 +1086,7 @@
         globalDropletsOpacity = 1 - transitionProgress; // droplets dissolve
       }
       
-      // 2. Video glass card only starts showing up AFTER text/ingredients are completely gone (from 0.20 to 0.40)
+      // 2. Video glass card only starts showing up AFTER text is completely gone (from 0.20 to 0.40)
       if (scrollPct > 0.20) {
         videoOpacity = (scrollPct - 0.20) / 0.20;
         videoOpacity = Math.max(0, Math.min(1, videoOpacity));
