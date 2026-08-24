@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taro Bliss — Deconstructed</title>
+  <!-- Google Fonts for premium typography and luxury cursive script -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* CSS RESET & VARIABLES */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    :root {
+      /* Deep Black & Premium Gold Theme */
+      --bg-color: #000000;
+      --text-main: oklch(98% 0.005 85); /* Slightly warm white */
+      --text-muted: oklch(72% 0.04 85); /* Soft gold-tinted gray */
+      
+      /* Gold Accents */
+      --gold: oklch(82% 0.11 85); /* Elegant soft gold */
+      --gold-dark: oklch(65% 0.09 85);
+      --gold-glow: oklch(82% 0.11 85 / 0.15);
+      
+      /* Typography */
+      --font-display: 'Pinyon Script', cursive;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      
+      /* Transitions */
+      --transition-smooth: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-fast: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      
+      /* Layout clearances */
+      --header-height: 6rem;
+    }
+    
+    html {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    
+    body {
+      overflow-x: hidden;
+      background-color: var(--bg-color);
+    }
+    
+    /* PRELOADER SCREEN */
+    #loader {
+      position: fixed;
+      inset: 0;
+      background-color: var(--bg-color);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    #loader.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .loader-logo {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 6vw, 5rem);
+      color: var(--gold);
+      margin-bottom: 2rem;
+      font-weight: 400;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 1s forwards 0.2s;
+    }
+    
+    .loader-bar-container {
+      width: 200px;
+      height: 1px;
+      background-color: oklch(15% 0.01 85);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .loader-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background-color: var(--gold);
+      transition: width 0.4s ease-out;
+    }
+    
+    /* SHINY HORIZONTAL FLOWING LINES CANVAS */
+    #flow-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0; /* Sits in background behind video card */
+      pointer-events: none;
+      background-color: #000000;
+    }
+    
+    /* STICKY HEADER NAVIGATION */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 2rem 2.5rem;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+    
+    .logo {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 400;
+      pointer-events: auto; /* Enable logo click */
+    }
+    
+    /* SCROLL INDICATOR */
+    .scroll-hint {
+      position: fixed;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      transition: opacity 0.5s ease;
+    }
+    
+    .scroll-hint.hide {
+      opacity: 0;
+    }
+    
+    .scroll-text {
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      font-weight: 500;
+    }
+    
+    .scroll-line-container {
+      width: 1px;
+      height: 40px;
+      background-color: oklch(20% 0.02 85 / 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .scroll-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 30%;
+      background-color: var(--gold);
+      animation: scrollDownIndicator 2.2s infinite ease-in-out;
+    }
+    
+    /* FIXED BACKGROUND VIEWPORT ENGINE */
+    .background-viewport {
+      position: fixed;
+      inset: 0;
+      z-index: 2; /* Sits above the background canvas (z-index 0) */
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    
+    .video-perspective-wrapper {
+      perspective: 1500px;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      padding-top: var(--header-height);
+      padding-bottom: 0;
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+    
+    .video-container-3d {
+      width: 100%;
+      aspect-ratio: 1284 / 716;
+      max-width: calc((100vh - var(--header-height)) * 1284 / 716);
+      max-height: calc(100vh - var(--header-height));
+      background-color: #000000;
+      position: relative;
+      transform-style: preserve-3d;
+      opacity: 0; /* Hidden initially in Hero Section */
+      
+      /* Glass Black Box Styling */
+      border-radius: 20px;
+      border: 1px solid rgba(223, 188, 138, 0.38); /* Defined glass border */
+      box-shadow: 0 35px 100px rgba(0, 0, 0, 0.95), 
+                  0 0 50px rgba(223, 188, 138, 0.08);
+                  
+      /* IMPORTANT: Remove CSS transition for opacity to prevent scroll update lag */
+      transition: transform 0.15s ease-out; 
+    }
+    
+    #scrub-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 19px;
+      pointer-events: none;
+      display: block;
+    }
+    
+    /* FLOATING INTERACTIVE ANNOTATIONS SYSTEM */
+    .annotations-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    .annotation-item {
+      position: absolute;
+      transform: translate3d(0, 15px, 0);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+                  transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    
+    .annotation-item.active {
+      opacity: 1;
+      transform: translate3d(0, 0, 30px);
+      pointer-events: auto;
+    }
+    
+    .marker-dot {
+      width: 12px;
+      height: 12px;
+      background-color: var(--gold);
+      border-radius: 50%;
+      cursor: pointer;
+      position: relative;
+      pointer-events: auto;
+      box-shadow: 0 0 10px var(--gold-glow);
+      transition: background-color var(--transition-fast), transform var(--transition-fast);
+    }
+    
+    .marker-dot::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px solid var(--gold);
+      animation: pulseMarker 2s infinite ease-out;
+      opacity: 0.8;
+    }
+    
+    .marker-dot:hover {
+      background-color: #ffffff;
+      transform: scale(1.25);
+    }
+    
+    .annotation-card {
+      position: absolute;
+      background: rgba(10, 10, 10, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid oklch(35% 0.05 85 / 0.4);
+      border-radius: 8px;
+      padding: 1.1rem 1.3rem;
+      width: 260px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      z-index: 20;
+      opacity: 0;
+      visibility: hidden;
+      transform: translate3d(-50%, 10px, 0);
+      transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+                  transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+                  visibility 0.3s;
+    }
+    
+    .card-top { bottom: 25px; left: 50%; transform: translate3d(-50%, 10px, 0); }
+    .card-bottom { top: 25px; left: 50%; transform: translate3d(-50%, -10px, 0); }
+    .card-left { top: 50%; right: 25px; left: auto; transform: translate3d(10px, -50%, 0); }
+    .card-right { top: 50%; left: 25px; right: auto; transform: translate3d(-10px, -50%, 0); }
+    
+    .annotation-item:hover .annotation-card,
+    .annotation-item.focused .annotation-card {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .annotation-item:hover .card-top, .annotation-item.focused .card-top { transform: translate3d(-50%, 0, 0); }
+    .annotation-item:hover .card-bottom, .annotation-item.focused .card-bottom { transform: translate3d(-50%, 0, 0); }
+    .annotation-item:hover .card-left, .annotation-item.focused .card-left { transform: translate3d(0, -50%, 0); }
+    .annotation-item:hover .card-right, .annotation-item.focused .card-right { transform: translate3d(0, -50%, 0); }
+    
+    .card-title {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--gold);
+      margin-bottom: 0.3rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    
+    .card-text {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      font-weight: 300;
+    }
+    
+    /* DYNAMIC VIDEO TARGET COORDINATES */
+    #annotation-cream { top: 25%; left: 51%; }
+    #annotation-floating-boba { top: 68%; left: 35%; }
+    #annotation-cubes { top: 48%; left: 24%; }
+    #annotation-splash { top: 42%; left: 45%; }
+    #annotation-straw { top: 18%; left: 59%; }
+    #annotation-shake { top: 50%; left: 50%; }
+    #annotation-settled-boba { top: 88%; left: 50%; }
+    
+    /* SHINY CURSIVE HERO BRAND CENTERPIECE */
+    .hero-brand-container {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      pointer-events: none;
+      
+      /* IMPORTANT: Remove CSS transition to prevent scroll update lag */
+      transition: none; 
+    }
+    
+    .hero-brand {
+      font-family: var(--font-display); /* Cursive Script */
+      font-size: clamp(4.5rem, 15vw, 11rem);
+      font-weight: 400;
+      text-align: center;
+      padding: 0 1rem;
+      letter-spacing: 0; /* No letter-spacing for cursive connection */
+      
+      /* Metallic Gold Shiny sweep */
+      background: linear-gradient(120deg, 
+        var(--gold) 35%, 
+        #ffffff 50%, 
+        var(--gold) 65%
+      );
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shineGold 4.5s linear infinite;
+      filter: drop-shadow(0 0 25px rgba(223, 188, 138, 0.25));
+    }
+    
+    /* SCROLL TRACK HEIGHT SPACER FOR MAPPING */
+    .scroll-track-container {
+      position: relative;
+      height: 400vh; /* Keeps the page scroll depth */
+      width: 100%;
+      z-index: 20;
+      pointer-events: none;
+    }
+    
+    /* KEYFRAMES */
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes scrollDownIndicator {
+      0% { top: -30%; }
+      50% { top: 100%; }
+      100% { top: -30%; }
+    }
+    
+    @keyframes pulseMarker {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(223, 188, 138, 0.4);
+      }
+      70% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 10px rgba(223, 188, 138, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(223, 188, 138, 0);
+      }
+    }
+    
+    @keyframes shineGold {
+      0% { background-position: 200% center; }
+      100% { background-position: -200% center; }
+    }
+    
+    /* RESPONSIVE LAYOUTS */
+    @media (max-width: 900px) {
+      header { padding: 1.5rem; }
+      .annotation-card { width: 200px; padding: 0.8rem 1rem; }
+      .video-perspective-wrapper { padding-left: 1.5rem; padding-right: 1.5rem; }
+    }
+    
+    @media (max-width: 600px) {
+      :root {
+        --header-height: 5.5rem;
+      }
+      header {
+        justify-content: center;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        padding: 1rem;
+      }
+      
+      .annotation-card { width: 155px; padding: 0.6rem 0.8rem; }
+      .card-title { font-size: 0.85rem; }
+      .card-text { font-size: 0.7rem; }
+      .video-perspective-wrapper { padding-left: 1rem; padding-right: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOADING BAR SCREEN -->
+  <div id="loader">
+    <div class="loader-logo">Taro Bliss</div>
+    <div class="loader-bar-container">
+      <div class="loader-bar" id="loader-bar"></div>
+    </div>
+  </div>
+
+  <!-- SHINY HORIZONTAL FLOWING LINES CANVAS -->
+  <canvas id="flow-canvas"></canvas>
+
+  <!-- FIXED STICKY BACKGROUND VIEWPORT (VIDEO ENGINE) -->
+  <div class="background-viewport">
+    <div class="video-perspective-wrapper">
+      
+      <!-- Video card wrapped in glass black box floating card design -->
+      <div class="video-container-3d" id="video-card">
+        <!-- Keyframe-optimized watermark-free taro deconstruction video -->
+        <video id="scrub-video" src="clean_video.mp4" playsinline muted preload="auto"></video>
+        
+        <!-- Absolute Interactive Annotation Elements -->
+        <div class="annotations-overlay">
+          
+          <!-- Whipped Cream Layer (Active: 0.0s - 1.2s) -->
+          <div class="annotation-item" id="annotation-cream" data-start="0.0" data-end="1.2">
+            <div class="marker-dot"></div>
+            <div class="annotation-card card-top">
+              <h4 class="card-title">Whipped Cream</h4>
+              <p class="card-text">Fluffy lavender whipping cream topped with taro root dust shavings.</p>
+            </div>
+          </div>
+          
+          <!-- Floating Tapioca (Active: 0.0s - 1.8s) -->
+          <div class="annotation-item" id="annotation-floating-boba" data-start="0.0" data-end="1.8">
+            <div class="marker-dot"></div>
+            <div class="annotation-card card-right">
+              <h4 class="card-title">Tapioca Pearls</h4>
+              <p class="card-text">Hand-rolled cassava boba pearls simmered in rich caramelized molasses.</p>
+            </div>
+          </div>
+          
+          <!-- Taro Chunks (Active: 0.8s - 2.5s) -->
+          <div class="annotation-item" id="annotation-cubes" data-start="0.8" data-end="2.5">
+            <div class="marker-dot"></div>
+            <div class="annotation-card card-right">
+              <h4 class="card-title">Steamed Taro</h4>
+              <p class="card-text">Fragrant organic taro cubes simmered slowly to create a rich velvety texture.</p>
+            </div>
+          </div>
+          
+          <!-- Milk Splash (Active: 0.2s - 2.2s) -->
+          <div class="annotation-item" id="annotation-splash" data-start="0.2" data-end="2.2">
+            <div class="marker-dot"></div>
+            <div class="annotation-card card-left">
+              <h4 class="card-title">Milk Splash</h4>
+              <p class="card-text">A smooth infusion of organic milk splashed with floral jasmine green tea extract.</p>
+            </div>
+          </div>
+          
+          <!-- Copper Straw (Active: 1.0s - 2.8s) -->
+          <div class="annotation-item" id="annotation-straw" data-start="1.0" data-end="2.8">
+            <div class="marker-dot"></div>
+            <div class="annotation-card card-top">
+              <h4 class="card-title">Copper Straw</h4>
+              <p class="card-text">Custom wide-diameter polished rose-gold metal straw designed for an optimal draw.</p>
+            </div>
+          </div>
+          
+          <!-- Swirling Milkshake Vortex (Active: 2.8s - 5.04s) -->
+          <div class="annotation-item" id="annotation-shake" data-start="2.8" data-end="5.04">
+            <div class="marker-dot"></div>
+            <div class="annotation-card card-bottom">
+              <h4 class="card-title">Taro Milkshake</h4>
+              <p class="card-text">The fully assembled beverage, chilled and swirling in perfect, creamy harmony.</p>
+            </div>
+          </div>
+          
+          <!-- Bottom Boba Bed (Active: 3.2s - 5.04s) -->
+          <div class="annotation-item" id="annotation-settled-boba" data-start="3.2" data-end="5.04">
+            <div class="marker-dot"></div>
+            <div class="annotation-card card-top">
+              <h4 class="card-title">Chewy Bed</h4>
+              <p class="card-text">A generous, dense layer of glossed tapioca pearls settled at the base of the cup.</p>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- FIXED BRANDING NAVIGATION -->
+  <header>
+    <a href="#" class="logo">Taro Bliss</a>
+  </header>
+
+  <!-- SHINY CURSIVE CENTERPIECE HERO BRAND NAME -->
+  <div class="hero-brand-container">
+    <h1 class="hero-brand">Taro Bliss</h1>
+  </div>
+
+  <!-- SCROLL INDICATOR -->
+  <div class="scroll-hint" id="scroll-hint">
+    <span class="scroll-text">Scroll to dissect</span>
+    <div class="scroll-line-container">
+      <div class="scroll-line"></div>
+    </div>
+  </div>
+
+  <!-- SCROLL TRACK SPACER -->
+  <div class="scroll-track-container" id="scroll-section"></div>
+
+  <!-- SCROLL, TILT, CANVAS ENGINES -->
+  <script>
+    // 1. PRELOADER CONTROLLER
+    const loader = document.getElementById('loader');
+    const loaderBar = document.getElementById('loader-bar');
+    const video = document.getElementById('scrub-video');
+    const scrollHint = document.getElementById('scroll-hint');
+    
+    let videoLoaded = false;
+    let windowLoaded = false;
+    
+    function updateLoaderProgress(pct) {
+      loaderBar.style.width = `${pct}%`;
+      if (pct >= 100) {
+        setTimeout(() => {
+          loader.classList.add('fade-out');
+        }, 300);
+      }
+    }
+    
+    let progress = 10;
+    updateLoaderProgress(progress);
+    
+    video.addEventListener('loadedmetadata', () => {
+      videoLoaded = true;
+      progress += 40;
+      updateLoaderProgress(progress);
+      checkAllLoaded();
+    });
+    
+    window.addEventListener('load', () => {
+      windowLoaded = true;
+      progress += 50;
+      updateLoaderProgress(progress);
+      checkAllLoaded();
+    });
+    
+    setTimeout(() => {
+      updateLoaderProgress(100);
+    }, 3500);
+    
+    function checkAllLoaded() {
+      if (videoLoaded && windowLoaded) {
+        updateLoaderProgress(100);
+      }
+    }
+
+    // 2. SHINY METALLIC FLOWING CANVAS LINES ENGINE (Background Pattern)
+    const canvas = document.getElementById('flow-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+    
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+    
+    const lines = [];
+    const lineCount = 14;
+    
+    for (let i = 0; i < lineCount; i++) {
+      lines.push({
+        yRatio: 0.12 + (i / lineCount) * 0.76, // distribute waves vertically
+        speed: 0.0018 + Math.random() * 0.002,
+        amplitude: 40 + Math.random() * 80,
+        wavelength: 0.0006 + Math.random() * 0.0012,
+        phase: Math.random() * Math.PI * 2,
+        opacity: 0.04 + Math.random() * 0.08, // Highly translucent background wires
+        width: 0.3 + Math.random() * 0.4 // 0.3px to 0.7px ultra-thin lines
+      });
+    }
+    
+    function animateLines() {
+      // Clear canvas fully on each frame to render behind the glass card cleanly
+      ctx.clearRect(0, 0, width, height);
+      
+      const scrollSpeedBoost = 1 + (window.scrollY * 0.002);
+      
+      // Specular light metallic gradient for gold wires
+      const grad = ctx.createLinearGradient(0, 0, width, 0);
+      grad.addColorStop(0, '#8a6f27');
+      grad.addColorStop(0.2, '#dfbc8a');
+      grad.addColorStop(0.4, '#ffffff'); // Specifications shine highlight
+      grad.addColorStop(0.5, '#f3e5ab');
+      grad.addColorStop(0.7, '#dfbc8a');
+      grad.addColorStop(1, '#8a6f27');
+      
+      lines.forEach(line => {
+        line.phase += line.speed * scrollSpeedBoost;
+        
+        ctx.beginPath();
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = line.width;
+        ctx.shadowColor = 'rgba(223, 188, 138, 0.2)';
+        ctx.shadowBlur = 4;
+        
+        const startY = height * line.yRatio;
+        
+        for (let x = 0; x < width; x += 5) {
+          const angle = x * line.wavelength + line.phase;
+          const y = startY + Math.sin(angle) * line.amplitude * Math.cos(angle * 0.35);
+          
+          if (x === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+        ctx.stroke();
+      });
+      
+      requestAnimationFrame(animateLines);
+    }
+    animateLines();
+
+    // 3. VIDEO SCROLL-SCRUBBING ENGINE & TRANSITION CONTROLLER
+    const scrollSection = document.getElementById('scroll-section');
+    const videoCard = document.getElementById('video-card');
+    const heroBrandContainer = document.querySelector('.hero-brand-container');
+    const logoLink = document.querySelector('.logo');
+    
+    let targetTime = 0;
+    let currentTime = 0;
+    const lerpFactor = 0.07;
+    
+    function initScrollEngine() {
+      video.pause();
+      window.addEventListener('scroll', handleScroll);
+      handleScroll();
+      requestAnimationFrame(scrubLoop);
+    }
+    
+    function handleScroll() {
+      if (!video.duration) return;
+      
+      const rect = scrollSection.getBoundingClientRect();
+      const totalScrollableHeight = rect.height - window.innerHeight;
+      
+      let scrollPct = -rect.top / totalScrollableHeight;
+      scrollPct = Math.max(0, Math.min(1, scrollPct));
+      
+      if (scrollPct > 0.05) {
+        scrollHint.classList.add('hide');
+      } else {
+        scrollHint.classList.remove('hide');
+      }
+      
+      // Reverse scroll scrubbing mapping
+      targetTime = (1 - scrollPct) * video.duration;
+      
+      // 3A. STRICT SEQUENTIAL HERO TRANSITION (No overlap guaranteed)
+      let videoOpacity = 0;
+      let brandOpacity = 1;
+      let brandTranslateY = 0;
+      
+      // 1. Text fades out completely between scrollPct 0.0 and 0.15
+      if (scrollPct < 0.15) {
+        brandOpacity = 1 - (scrollPct / 0.15);
+        brandTranslateY = -scrollPct * 150;
+        videoOpacity = 0; // Strictly ensure video is invisible while text is fading
+      } else {
+        brandOpacity = 0;
+        brandTranslateY = -150;
+        
+        // 2. Video glass card only starts showing up AFTER text is completely gone (from 0.20 to 0.40)
+        if (scrollPct > 0.20) {
+          videoOpacity = (scrollPct - 0.20) / 0.20;
+          videoOpacity = Math.max(0, Math.min(1, videoOpacity));
+        } else {
+          videoOpacity = 0; // Gap between 0.15 and 0.20 shows only empty black screen + lines
+        }
+      }
+      
+      videoCard.style.opacity = videoOpacity;
+      videoCard.style.pointerEvents = videoOpacity > 0.15 ? 'auto' : 'none';
+      
+      heroBrandContainer.style.opacity = brandOpacity;
+      heroBrandContainer.style.transform = `translateY(${brandTranslateY}px)`;
+      heroBrandContainer.style.pointerEvents = brandOpacity > 0.1 ? 'auto' : 'none';
+    }
+    
+    function scrubLoop() {
+      if (video.duration) {
+        currentTime += (targetTime - currentTime) * lerpFactor;
+        
+        if (Math.abs(currentTime - targetTime) < 0.0005) {
+          currentTime = targetTime;
+        }
+        
+        video.currentTime = currentTime;
+        updateAnnotations(currentTime);
+      }
+      requestAnimationFrame(scrubLoop);
+    }
+    
+    // 4. ANNOTATIONS CONTROLLER
+    const annotationItems = document.querySelectorAll('.annotation-item');
+    
+    function updateAnnotations(time) {
+      annotationItems.forEach(item => {
+        const start = parseFloat(item.getAttribute('data-start'));
+        const end = parseFloat(item.getAttribute('data-end'));
+        
+        if (time >= start && time <= end) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    }
+    
+    if (video.readyState >= 1) {
+      initScrollEngine();
+    } else {
+      video.addEventListener('loadedmetadata', initScrollEngine);
+    }
+    
+    // Logo scroll to top trigger
+    logoLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+    
+    // 5. 3D VIEWPORT PARALLAX HOVER TILT
+    window.addEventListener('mousemove', (e) => {
+      const x = e.clientX / window.innerWidth - 0.5;
+      const y = e.clientY / window.innerHeight - 0.5;
+      
+      const rotateY = x * 6;
+      const rotateX = -y * 5;
+      
+      videoCard.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03) translate3d(${x * 10}px, ${y * 10}px, 0)`;
+    });
+
+    // Marker dots event bounds
+    annotationItems.forEach(item => {
+      const dot = item.querySelector('.marker-dot');
+      dot.setAttribute('tabindex', '0');
+      
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const parent = item;
+        const wasFocused = parent.classList.contains('focused');
+        
+        annotationItems.forEach(el => el.classList.remove('focused'));
+        
+        if (!wasFocused) {
+          parent.classList.add('focused');
+        }
+      });
+    });
+    
+    document.addEventListener('click', () => {
+      annotationItems.forEach(el => el.classList.remove('focused'));
+    });
+  </script>
+</body>
+</html>
