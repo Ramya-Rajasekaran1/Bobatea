@@ -529,10 +529,18 @@
       border-radius: 19px;
       pointer-events: none;
       display: block;
+      
+      /* Smooth translation when shifting left in Phase 3/4 */
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    /* SHIFT GLASS VIDEO AND ANNOTATIONS TO THE LEFT IN PHASE 3/4 */
+    .lab-video-card.shift-left video {
+      transform: translate3d(-18%, 0, 0) scale(1.02);
     }
 
     /* STEPPED BLUEPRINT & TECHNICAL CARD OVERLAYS */
-    .blueprint-overlay, .technical-overlay, .lab-annotations-overlay {
+    .blueprint-overlay, .technical-overlay {
       position: absolute;
       inset: 0;
       pointer-events: none;
@@ -541,9 +549,23 @@
       transition: opacity 0.5s ease;
     }
     
+    .lab-annotations-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 15;
+      transition: opacity 0.5s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
     .blueprint-overlay.active, .technical-overlay.active, .lab-annotations-overlay.active {
       opacity: 1;
       pointer-events: auto;
+    }
+    
+    /* Shift lab annotations overlay to the left to align with shifted glass */
+    .lab-video-card.shift-left .lab-annotations-overlay {
+      transform: translate3d(-18%, 0, 0);
     }
     
     .pointer-line {
@@ -554,10 +576,12 @@
       transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
     
-    .blueprint-overlay.active .pointer-line,
-    .technical-overlay.active .pointer-line {
-      width: 20%; /* Connecting line length */
-    }
+    /* Wide horizontal line stretch widths to connect shifted left components to right labels */
+    .blueprint-overlay.active .line-straw, .technical-overlay.active .line-straw { width: 37%; }
+    .blueprint-overlay.active .line-cream, .technical-overlay.active .line-cream { width: 42%; }
+    .blueprint-overlay.active .line-splash, .technical-overlay.active .line-splash { width: 46%; }
+    .blueprint-overlay.active .line-boba, .technical-overlay.active .line-boba { width: 50%; }
+    .blueprint-overlay.active .line-cup, .technical-overlay.active .line-cup { width: 46%; }
     
     .pointer-label {
       position: absolute;
@@ -570,6 +594,9 @@
       transform: translateX(10px);
       transition: opacity 0.5s ease 0.3s, transform 0.5s ease 0.3s;
       white-space: nowrap;
+      
+      /* Keep all label texts consistently locked in the right column of the box */
+      left: 64% !important; 
     }
     
     .blueprint-overlay.active .pointer-label,
@@ -732,6 +759,12 @@
       .lab-video-card {
         height: auto;
         aspect-ratio: 1284 / 716;
+      }
+      .lab-video-card.shift-left video {
+        transform: none !important; /* Keep centered on tablet/mobile */
+      }
+      .lab-video-card.shift-left .lab-annotations-overlay {
+        transform: none !important;
       }
       .pointer-line { display: none !important; } /* Hide lines to preserve mobile layout scale */
       .pointer-label { left: auto !important; right: 8% !important; }
@@ -941,20 +974,20 @@
 
           <!-- Phase 3: Exploded Layer Blueprint Overlay (Image 3) -->
           <div class="blueprint-overlay" id="lab-blueprint-layer">
-            <div class="pointer-line" style="top: 18%; left: 45%;"></div>
-            <span class="pointer-label" style="top: 18%; left: 68%;">5. Metallic Boba Straw</span>
+            <div class="pointer-line line-straw" style="top: 18%; left: 27%;"></div>
+            <span class="pointer-label" style="top: 18%;">5. Metallic Boba Straw</span>
 
-            <div class="pointer-line" style="top: 32%; left: 40%;"></div>
-            <span class="pointer-label" style="top: 32%; left: 68%;">4. Whipped Cream Swirl</span>
+            <div class="pointer-line" style="top: 32%; left: 22%;" class="pointer-line line-cream"></div>
+            <span class="pointer-label" style="top: 32%;">4. Whipped Cream Swirl</span>
 
-            <div class="pointer-line" style="top: 50%; left: 36%;"></div>
-            <span class="pointer-label" style="top: 50%; left: 68%;">3. Rich Taro Milkshake & Splashes</span>
+            <div class="pointer-line" style="top: 50%; left: 18%;" class="pointer-line line-splash"></div>
+            <span class="pointer-label" style="top: 50%;">3. Rich Taro Milkshake & Splashes</span>
 
-            <div class="pointer-line" style="top: 68%; left: 32%;"></div>
-            <span class="pointer-label" style="top: 68%; left: 68%;">2. Tapioca Boba Pearls</span>
+            <div class="pointer-line" style="top: 68%; left: 14%;" class="pointer-line line-boba"></div>
+            <span class="pointer-label" style="top: 68%;">2. Tapioca Boba Pearls</span>
 
-            <div class="pointer-line" style="top: 85%; left: 36%;"></div>
-            <span class="pointer-label" style="top: 85%; left: 68%;">1. Transparent Glass Cup</span>
+            <div class="pointer-line" style="top: 85%; left: 18%;" class="pointer-line line-cup"></div>
+            <span class="pointer-label" style="top: 85%;">1. Transparent Glass Cup</span>
           </div>
 
           <!-- Phase 4: Labeled Technical Axis Overlay (Image 4) -->
@@ -978,20 +1011,20 @@
             </div>
 
             <!-- Right side pointer lines and labels -->
-            <div class="pointer-line" style="top: 18%; left: 45%;"></div>
-            <span class="pointer-label" style="top: 18%; left: 68%;">Stainless Steel Straw (E)</span>
+            <div class="pointer-line line-straw" style="top: 18%; left: 27%;"></div>
+            <span class="pointer-label" style="top: 18%;">Stainless Steel Straw (E)</span>
 
-            <div class="pointer-line" style="top: 32%; left: 40%;"></div>
-            <span class="pointer-label" style="top: 32%; left: 68%;">Sculpted Whipped Cream (D)</span>
+            <div class="pointer-line line-cream" style="top: 32%; left: 22%;"></div>
+            <span class="pointer-label" style="top: 32%;">Sculpted Whipped Cream (D)</span>
 
-            <div class="pointer-line" style="top: 50%; left: 36%;"></div>
-            <span class="pointer-label" style="top: 50%; left: 68%;">Frozen Milkshake Explosion (C)</span>
+            <div class="pointer-line" style="top: 50%; left: 18%;" class="pointer-line line-splash"></div>
+            <span class="pointer-label" style="top: 50%;">Frozen Milkshake Explosion (C)</span>
 
-            <div class="pointer-line" style="top: 68%; left: 32%;"></div>
-            <span class="pointer-label" style="top: 68%; left: 68%;">Tapioca Pearls (B)</span>
+            <div class="pointer-line line-boba" style="top: 68%; left: 14%;"></div>
+            <span class="pointer-label" style="top: 68%;">Tapioca Pearls (B)</span>
 
-            <div class="pointer-line" style="top: 85%; left: 36%;"></div>
-            <span class="pointer-label" style="top: 85%; left: 68%;">Glass Base (A)</span>
+            <div class="pointer-line line-cup" style="top: 85%; left: 18%;"></div>
+            <span class="pointer-label" style="top: 85%;">Glass Base (A)</span>
           </div>
           
           <!-- Absolute Interactive Annotation Elements (Visible in Phase 4 / Labeled) -->
@@ -1640,6 +1673,7 @@
         // Image 1: Full glass assembled
         labTargetTime = labVideo.duration;
         labStatusText.textContent = "Phase 1: Assembled";
+        labCard.classList.remove('shift-left');
         labBlueprint.classList.remove('active');
         labTechnical.classList.remove('active');
         labAnnotationsOverlay.classList.remove('active');
@@ -1647,20 +1681,23 @@
         // Image 2: Active splash explosion deconstructing
         labTargetTime = labVideo.duration * 0.55; // Splash middle frame
         labStatusText.textContent = "Phase 2: Deconstructing";
+        labCard.classList.remove('shift-left');
         labBlueprint.classList.remove('active');
         labTechnical.classList.remove('active');
         labAnnotationsOverlay.classList.remove('active');
       } else if (phase === 3) {
-        // Image 3: Exploded Layer Blueprint pointer lines
+        // Image 3: Exploded Layer Blueprint pointer lines (Shifts glass left to leave space on right)
         labTargetTime = 0.05; // Fully separated frame
         labStatusText.textContent = "Phase 3: Layer Blueprint";
+        labCard.classList.add('shift-left');
         labBlueprint.classList.add('active');
         labTechnical.classList.remove('active');
         labAnnotationsOverlay.classList.remove('active');
       } else if (phase === 4) {
-        // Image 4: Technical vertical ruler labels with interactive dots
+        // Image 4: Technical vertical ruler labels (Shifts glass left to leave space on right)
         labTargetTime = 0.05; // Keep fully separated frame
         labStatusText.textContent = "Phase 4: Technical Annotations";
+        labCard.classList.add('shift-left');
         labBlueprint.classList.remove('active');
         labTechnical.classList.add('active');
         labAnnotationsOverlay.classList.add('active'); // Fade in annotation dots
