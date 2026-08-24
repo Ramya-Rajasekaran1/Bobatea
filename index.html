@@ -412,7 +412,7 @@
     #ing-boba { --start-x: -26vw; --start-y: 20vh; }
     #ing-cream { --start-x: 30vw; --start-y: 24vh; }
     
-    /* Separate floating animations on inner SVGs to prevent transform property override conflicts */
+    /* Separate floating animations on inner SVGs to prevent transform conflicts */
     .hero-ingredient svg {
       transition: transform 0.3s ease;
     }
@@ -458,6 +458,74 @@
       pointer-events: none;
     }
     
+    /* SCROLL TRACK OVERLAY PAGES (Alternate Left and Right alignment) */
+    .scroll-page {
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      padding: 0 8%;
+      pointer-events: none;
+    }
+    
+    /* Alternate slides placement on side edges */
+    #page-1 { justify-content: center; } /* Hero slide holds empty spacer */
+    #page-2 { justify-content: flex-start; } /* Velvet Fusion (left) */
+    #page-3 { justify-content: flex-end; }   /* Starch meets Flora (right) */
+    #page-4 { justify-content: flex-start; } /* Pure Elements (left) */
+    
+    .page-content {
+      max-width: 420px;
+      padding: 2.5rem 3rem;
+      background: rgba(10, 10, 10, 0.45); /* Translucent glass card background */
+      backdrop-filter: blur(25px) saturate(160%); /* Glossy Glassmorphism */
+      -webkit-backdrop-filter: blur(25px) saturate(160%);
+      border: 1px solid rgba(223, 188, 138, 0.2); /* Gold glass frame border */
+      border-radius: 16px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.12); /* Gloss edge highlight reflection */
+      pointer-events: auto;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity var(--transition-smooth), transform var(--transition-smooth);
+    }
+    
+    .page-content.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    #content-1 {
+      display: none; /* Spacer content remains hidden */
+    }
+    
+    .page-num {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.2em;
+      display: block;
+      margin-bottom: 1rem;
+    }
+    
+    .page-title {
+      font-family: var(--font-body);
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--text-main);
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    
+    .page-description {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+    
     /* KEYFRAMES */
     @keyframes fadeInUp {
       to {
@@ -494,6 +562,14 @@
     
     /* RESPONSIVE LAYOUTS */
     @media (max-width: 900px) {
+      .scroll-page {
+        justify-content: center !important;
+        padding: 0 1.5rem;
+      }
+      .page-content {
+        max-width: 90%;
+        padding: 2rem;
+      }
       header { padding: 1.5rem; }
       .annotation-card { width: 200px; padding: 0.8rem 1rem; }
       .video-perspective-wrapper { padding-left: 1.5rem; padding-right: 1.5rem; }
@@ -687,8 +763,48 @@
     </div>
   </div>
 
-  <!-- SCROLL TRACK SPACER -->
-  <div class="scroll-track-container" id="scroll-section"></div>
+  <!-- SCROLL TRACK OVERLAYS CONTAINER -->
+  <div class="scroll-track-container" id="scroll-section">
+    <!-- PAGE 01: Hero Centerpiece Space -->
+    <section class="scroll-page" id="page-1">
+      <div class="page-content" id="content-1">
+        <!-- Spacer hidden -->
+      </div>
+    </section>
+
+    <!-- PAGE 02: Velvet Fusion (The Blend) -->
+    <section class="scroll-page" id="page-2">
+      <div class="page-content" id="content-2">
+        <span class="page-num">01 / THE BLEND</span>
+        <h2 class="page-title">Velvet Fusion</h2>
+        <p class="page-description">
+          The core beverage consists of steamed taro root mashed into a thick sweet purée, settling into a dense tapioca pearl bed under a vacuum copper draft.
+        </p>
+      </div>
+    </section>
+
+    <!-- PAGE 03: Starch meets Flora (The Collision) -->
+    <section class="scroll-page" id="page-3">
+      <div class="page-content" id="content-3">
+        <span class="page-num">02 / THE COLLISION</span>
+        <h2 class="page-title">Starch meets Flora</h2>
+        <p class="page-description">
+          A dynamic splash as cold organic cream collides with floral jasmine green tea infusions, suspending steamed taro chunks in mid-air.
+        </p>
+      </div>
+    </section>
+
+    <!-- PAGE 04: Pure Elements (Deconstructed) -->
+    <section class="scroll-page" id="page-4">
+      <div class="page-content" id="content-4">
+        <span class="page-num">03 / DECONSTRUCTED</span>
+        <h2 class="page-title">Pure Elements</h2>
+        <p class="page-description">
+          Everything suspended in time: fluffy piped whipping cream, floating tapioca boba, and steamed taro cubes resting in zero gravity.
+        </p>
+      </div>
+    </section>
+  </div>
 
   <!-- SCROLL, TILT, CANVAS ENGINES -->
   <script>
@@ -811,6 +927,7 @@
     const videoCard = document.getElementById('video-card');
     const heroBrandContainer = document.querySelector('.hero-brand-container');
     const logoLink = document.querySelector('.logo');
+    const pages = document.querySelectorAll('.page-content');
     
     let targetTime = 0;
     let currentTime = 0;
@@ -881,6 +998,18 @@
       heroBrandContainer.style.opacity = brandOpacity;
       heroBrandContainer.style.transform = `translateY(${brandTranslateY}px)`;
       heroBrandContainer.style.pointerEvents = brandOpacity > 0.1 ? 'auto' : 'none';
+      
+      // 3B. HANDLE OVERLAY PAGES ACTIVE CLASSES
+      let activeIndex = Math.floor(scrollPct * 4);
+      if (activeIndex > 3) activeIndex = 3;
+      
+      pages.forEach((page, index) => {
+        if (index === activeIndex) {
+          page.classList.add('active');
+        } else {
+          page.classList.remove('active');
+        }
+      });
     }
     
     function scrubLoop() {
