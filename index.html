@@ -819,6 +819,30 @@
         this.vx *= 0.99;
         this.vy *= 0.99;
         
+        // Center text exclusion zone (ellipse repulsion to keep brand title clean)
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const rx = 300; // horizontal radius of exclusion ellipse
+        const ry = 120; // vertical radius of exclusion ellipse
+        const tDx = this.x - centerX;
+        const tDy = this.y - centerY;
+        const distRatio = (tDx * tDx) / (rx * rx) + (tDy * tDy) / (ry * ry);
+        
+        if (distRatio < 1.0) {
+          const angle = Math.atan2(tDy * rx, tDx * ry);
+          const pushForce = (1.0 - distRatio) * 0.12; // gentle push outwards
+          this.vx += Math.cos(angle) * pushForce;
+          this.vy += Math.sin(angle) * pushForce;
+        }
+
+        // Right-side details card exclusion zone (active when scrolling)
+        if (window.scrollY > 2) {
+          const rightBoundary = width * 0.65;
+          if (this.x > rightBoundary) {
+            this.vx -= (this.x - rightBoundary) * 0.02; // push away from right side
+          }
+        }
+        
         // Handle bounding box reflections (only active when scrolled all the way up, window.scrollY < 2)
         const isAllWayUp = window.scrollY < 2;
         if (isAllWayUp) {
