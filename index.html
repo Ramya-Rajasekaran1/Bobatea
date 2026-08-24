@@ -421,8 +421,9 @@
       opacity: 0;
       transform: translateY(30px);
       
-      /* IMPORTANT: Remove CSS transition for opacity/transform to prevent scroll update lag */
-      transition: none; 
+      /* Smooth 1-second CSS transitions for slow, premium reveal */
+      transition: opacity 1.0s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 1.0s cubic-bezier(0.16, 1, 0.3, 1);
     }
     
     #content-1 {
