@@ -461,7 +461,7 @@
       background-color: #000000;
       position: relative;
       z-index: 25; /* Sits above the background fixed viewport */
-      padding: 3rem 8%; /* Little padding on top/bottom */
+      padding: 1.5rem 8%; /* Little padding on top/bottom */
       width: 100%;
       height: 100vh; /* Full page height */
       display: flex;
@@ -511,8 +511,8 @@
       width: 100%;
       max-width: 100%; /* Constrain to column width, never overflows or covers left text */
       aspect-ratio: 1284 / 716;
-      height: auto; /* Scales proportionally based on width */
-      max-height: calc(100vh - 6rem); /* Full page height minus top/bottom padding */
+      height: calc(100vh - 3rem); /* Full size height minus top/bottom padding */
+      max-height: calc(100vh - 3rem); /* Full size height limit */
       background-color: #000000;
       border-radius: 20px;
       border: 1px solid rgba(223, 188, 138, 0.38);
@@ -640,28 +640,46 @@
       background: #000000;
     }
 
-    /* Floating card footer status indicator */
-    .lab-card-footer {
+    /* Floating card header (Selector placed on top of the box) */
+    .lab-card-header {
       position: absolute;
-      bottom: 1rem;
+      top: 1.5rem;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 20;
-      background: rgba(10, 10, 10, 0.7);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
+      z-index: 30;
+      background: rgba(10, 10, 10, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(223, 188, 138, 0.3);
+      border-radius: 30px;
       padding: 0.4rem 1.2rem;
-      font-size: 0.55rem;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--gold);
-      font-weight: 600;
-      animation: pulseFooter 2.5s infinite ease-in-out;
+      display: flex;
+      gap: 0.8rem;
+      align-items: center;
     }
     
-    /* Click to dissect tag in the top right corner of the box */
+    .lab-phase-tab {
+      font-size: 0.6rem;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+    
+    .lab-phase-tab.active {
+      color: var(--gold);
+      border-color: var(--gold);
+      background: rgba(223, 188, 138, 0.12);
+    }
+    
+    /* Click to dissect tag in the top right corner of the box (with rounded corners) */
     .lab-click-tag {
       position: absolute;
       top: 1.5rem;
@@ -669,8 +687,8 @@
       z-index: 25;
       background: rgba(223, 188, 138, 0.12);
       border: 1px solid rgba(223, 188, 138, 0.35);
-      border-radius: 4px;
-      padding: 0.35rem 0.8rem;
+      border-radius: 30px; /* Rounded pill style corners */
+      padding: 0.45rem 1.1rem;
       font-size: 0.55rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -689,11 +707,6 @@
         opacity: 1; 
         box-shadow: 0 0 12px 2px rgba(223, 188, 138, 0.25); 
       }
-    }
-    
-    @keyframes pulseFooter {
-      0%, 100% { opacity: 0.7; }
-      50% { opacity: 1; border-color: rgba(223, 188, 138, 0.4); }
     }
     
     /* KEYFRAMES */
@@ -966,11 +979,16 @@
         <div class="lab-video-card" id="lab-video-card">
           <video id="lab-video" src="clean_video.mp4" playsinline muted preload="auto"></video>
           
-          <!-- Small Click Tag Indication in the Box -->
+          <!-- Small Click Tag Indication in the Box (Pill rounded) -->
           <div class="lab-click-tag">Click</div>
 
-          <!-- Phase Status Indicator -->
-          <div class="lab-card-footer" id="lab-phase-status">Phase 1: Assembled</div>
+          <!-- Phase Tabs Selector placed on top of the box -->
+          <div class="lab-card-header" id="lab-phases-header">
+            <span class="lab-phase-tab active" data-phase="1">1</span>
+            <span class="lab-phase-tab" data-phase="2">2</span>
+            <span class="lab-phase-tab" data-phase="3">3</span>
+            <span class="lab-phase-tab" data-phase="4">4</span>
+          </div>
 
           <!-- Phase 3: Exploded Layer Blueprint Overlay (Image 3) -->
           <div class="blueprint-overlay" id="lab-blueprint-layer">
@@ -1622,8 +1640,8 @@
     const labBlueprint = document.getElementById('lab-blueprint-layer');
     const labTechnical = document.getElementById('lab-technical-layer');
     const labAnnotationsOverlay = document.getElementById('lab-annotations');
-    const labStatusText = document.getElementById('lab-phase-status');
     const labAnnotationItems = document.querySelectorAll('[id^="lab-ann"]');
+    const labPhaseTabs = document.querySelectorAll('.lab-phase-tab');
     
     // Scroll reveal hooks for Lab Section
     const labSection = document.getElementById('lab-section');
@@ -1665,10 +1683,18 @@
       if (!labVideo.duration) return;
       labCurrentPhase = phase;
       
+      // Update top tab active status class highlights
+      labPhaseTabs.forEach(tab => {
+        if (parseInt(tab.getAttribute('data-phase')) === phase) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+      
       if (phase === 1) {
         // Image 1: Full glass assembled
         labTargetTime = labVideo.duration;
-        labStatusText.textContent = "Phase 1: Assembled";
         labCard.classList.remove('shift-left');
         labBlueprint.classList.remove('active');
         labTechnical.classList.remove('active');
@@ -1676,7 +1702,6 @@
       } else if (phase === 2) {
         // Image 2: Active splash explosion deconstructing
         labTargetTime = labVideo.duration * 0.55; // Splash middle frame
-        labStatusText.textContent = "Phase 2: Deconstructing";
         labCard.classList.remove('shift-left');
         labBlueprint.classList.remove('active');
         labTechnical.classList.remove('active');
@@ -1684,7 +1709,6 @@
       } else if (phase === 3) {
         // Image 3: Exploded Layer Blueprint pointer lines (Shifts glass left to leave space on right)
         labTargetTime = 0.05; // Fully separated frame
-        labStatusText.textContent = "Phase 3: Layer Blueprint";
         labCard.classList.add('shift-left');
         labBlueprint.classList.add('active');
         labTechnical.classList.remove('active');
@@ -1692,7 +1716,6 @@
       } else if (phase === 4) {
         // Image 4: Technical vertical ruler labels (Shifts glass left to leave space on right)
         labTargetTime = 0.05; // Keep fully separated frame
-        labStatusText.textContent = "Phase 4: Technical Annotations";
         labCard.classList.add('shift-left');
         labBlueprint.classList.remove('active');
         labTechnical.classList.add('active');
@@ -1726,12 +1749,21 @@
     
     // Click card to step through phases
     labCard.addEventListener('click', (e) => {
-      // Don't cycle if click target is a marker dot or card tooltip
-      if (e.target.closest('.marker-dot') || e.target.closest('.annotation-card')) {
+      // Don't cycle if click target is a tab header, marker dot, or card tooltip
+      if (e.target.closest('.lab-phase-tab') || e.target.closest('.marker-dot') || e.target.closest('.annotation-card')) {
         return;
       }
       let nextPhase = (labCurrentPhase % 4) + 1;
       setLabPhase(nextPhase);
+    });
+    
+    // Bind click events to top tab headers
+    labPhaseTabs.forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetPhase = parseInt(tab.getAttribute('data-phase'));
+        setLabPhase(targetPhase);
+      });
     });
     
     // Bind click events to marker dots in lab
