@@ -751,7 +751,6 @@
     let lastMouseX = null;
     let lastMouseY = null;
     let mouseSpeed = 0;
-    let globalGravityY = 0; // Dynamic gravity pull driven by scroll progress
     let globalDropletsOpacity = 1; // Fades out as droplets fall down
     
     window.addEventListener('resize', () => {
@@ -816,15 +815,13 @@
         this.x += this.vx;
         this.y += this.vy;
         
-        // Apply down-gravity driven by scroll
-        this.vy += globalGravityY;
-        
         // Gentle friction/damping to prevent speeds from compounding out of bounds
         this.vx *= 0.99;
         this.vy *= 0.99;
         
-        // Handle bounding box reflections (only active at top scroll, otherwise let them fall off)
-        if (globalGravityY < 0.05) {
+        // Handle bounding box reflections (only active when scrolled all the way up, window.scrollY < 2)
+        const isAllWayUp = window.scrollY < 2;
+        if (isAllWayUp) {
           if (this.x - this.radius < 0) {
             this.x = this.radius;
             this.vx *= -0.7; // Dampened bounce
@@ -861,11 +858,9 @@
           }
         }
         
-        // Zero-gravity slow floating sways (Lazier drift)
-        if (globalGravityY < 0.05) {
-          this.vx += (Math.random() - 0.5) * 0.015;
-          this.vy += (Math.random() - 0.5) * 0.015;
-        }
+        // Zero-gravity slow floating sways (Lazier drift) - active at all times
+        this.vx += (Math.random() - 0.5) * 0.015;
+        this.vy += (Math.random() - 0.5) * 0.015;
       }
       
       split(mX, mY) {
@@ -1076,18 +1071,13 @@
         brandTranslateY = -scrollPct * 150;
         videoOpacity = 0; // Strictly ensure video is invisible while text is fading
         
-        // Gravity is zero, droplets drift float freely
-        globalGravityY = 0;
-        globalDropletsOpacity = 1;
+        globalDropletsOpacity = 1 - (scrollPct / 0.15); // Fade droplets out on scroll
       } else {
         brandOpacity = 0;
         brandTranslateY = -150;
         videoOpacity = 0;
         
-        // Introduce down gravity and fade droplets as you scroll past the text (0.15 to 0.20)
-        const transitionProgress = Math.min(1, (scrollPct - 0.15) / 0.05);
-        globalGravityY = transitionProgress * 0.8; // gravity pulls droplets downwards
-        globalDropletsOpacity = 1 - transitionProgress; // droplets dissolve
+        globalDropletsOpacity = 0; // Completely dissolved
       }
       
       // 2. Video glass card only starts showing up AFTER text is completely gone (from 0.20 to 0.40)
