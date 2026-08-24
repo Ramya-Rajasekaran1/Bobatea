@@ -509,10 +509,10 @@
     
     .lab-video-card {
       width: 100%;
-      height: calc(100vh - 6rem); /* Full page height minus top/bottom padding */
-      max-height: calc(100vh - 6rem);
+      max-width: 100%; /* Constrain to column width, never overflows or covers left text */
       aspect-ratio: 1284 / 716;
-      max-width: calc((100vh - 6rem) * 1284 / 716);
+      height: auto; /* Scales proportionally based on width */
+      max-height: calc(100vh - 6rem); /* Full page height minus top/bottom padding */
       background-color: #000000;
       border-radius: 20px;
       border: 1px solid rgba(223, 188, 138, 0.38);
@@ -520,6 +520,7 @@
       position: relative;
       cursor: pointer;
       margin: 0 auto;
+      overflow: hidden;
     }
     
     .lab-video-card video {
@@ -577,7 +578,6 @@
     }
     
     /* Wide horizontal line stretch widths to connect shifted left components to right labels */
-    .blueprint-overlay.active .line-straw, .technical-overlay.active .line-straw { width: 37%; }
     .blueprint-overlay.active .line-cream, .technical-overlay.active .line-cream { width: 42%; }
     .blueprint-overlay.active .line-splash, .technical-overlay.active .line-splash { width: 46%; }
     .blueprint-overlay.active .line-boba, .technical-overlay.active .line-boba { width: 50%; }
@@ -609,7 +609,7 @@
     .ruler-axis {
       position: absolute;
       left: 6%;
-      top: 15%;
+      top: 25%; /* Shifted down since Straw layer is removed */
       bottom: 12%;
       width: 1px;
       background: rgba(255, 255, 255, 0.25);
@@ -974,29 +974,23 @@
 
           <!-- Phase 3: Exploded Layer Blueprint Overlay (Image 3) -->
           <div class="blueprint-overlay" id="lab-blueprint-layer">
-            <div class="pointer-line line-straw" style="top: 18%; left: 27%;"></div>
-            <span class="pointer-label" style="top: 18%;">5. Metallic Boba Straw</span>
-
-            <div class="pointer-line" style="top: 32%; left: 22%;" class="pointer-line line-cream"></div>
+            <div class="pointer-line line-cream" style="top: 32%; left: 22%;"></div>
             <span class="pointer-label" style="top: 32%;">4. Whipped Cream Swirl</span>
 
-            <div class="pointer-line" style="top: 50%; left: 18%;" class="pointer-line line-splash"></div>
+            <div class="pointer-line line-splash" style="top: 50%; left: 18%;"></div>
             <span class="pointer-label" style="top: 50%;">3. Rich Taro Milkshake & Splashes</span>
 
-            <div class="pointer-line" style="top: 68%; left: 14%;" class="pointer-line line-boba"></div>
+            <div class="pointer-line line-boba" style="top: 68%; left: 14%;"></div>
             <span class="pointer-label" style="top: 68%;">2. Tapioca Boba Pearls</span>
 
-            <div class="pointer-line" style="top: 85%; left: 18%;" class="pointer-line line-cup"></div>
+            <div class="pointer-line line-cup" style="top: 85%; left: 18%;"></div>
             <span class="pointer-label" style="top: 85%;">1. Transparent Glass Cup</span>
           </div>
 
           <!-- Phase 4: Labeled Technical Axis Overlay (Image 4) -->
           <div class="technical-overlay" id="lab-technical-layer">
-            <!-- Left side vertical axis ruler scale -->
+            <!-- Left side vertical axis ruler scale (ticks for D, C, B, A) -->
             <div class="ruler-axis">
-              <div class="ruler-tick" style="top: 18%;"></div>
-              <div class="ruler-label" style="top: 18%;">E</div>
-
               <div class="ruler-tick" style="top: 32%;"></div>
               <div class="ruler-label" style="top: 32%;">D</div>
 
@@ -1011,13 +1005,10 @@
             </div>
 
             <!-- Right side pointer lines and labels -->
-            <div class="pointer-line line-straw" style="top: 18%; left: 27%;"></div>
-            <span class="pointer-label" style="top: 18%;">Stainless Steel Straw (E)</span>
-
             <div class="pointer-line line-cream" style="top: 32%; left: 22%;"></div>
             <span class="pointer-label" style="top: 32%;">Sculpted Whipped Cream (D)</span>
 
-            <div class="pointer-line" style="top: 50%; left: 18%;" class="pointer-line line-splash"></div>
+            <div class="pointer-line line-splash" style="top: 50%; left: 18%;"></div>
             <span class="pointer-label" style="top: 50%;">Frozen Milkshake Explosion (C)</span>
 
             <div class="pointer-line line-boba" style="top: 68%; left: 14%;"></div>
@@ -1544,7 +1535,12 @@
         } else if (index === 3) {
           // Pure Elements (Page 4): active from 0.75 to 1.0
           if (scrollPct > 0.75) {
-            cardOpacity = (scrollPct - 0.75) / 0.15;
+            if (scrollPct > 0.90) {
+              // Fade out slowly past 0.90 so the card doesn't hang in the transition
+              cardOpacity = 1 - (scrollPct - 0.90) / 0.08; 
+            } else {
+              cardOpacity = (scrollPct - 0.75) / 0.15;
+            }
           }
         }
         
