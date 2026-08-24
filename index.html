@@ -199,9 +199,9 @@
       align-items: center;
       pointer-events: none;
       padding-top: var(--header-height);
-      padding-bottom: 0; /* Align directly to bottom border */
-      padding-left: 2rem;
-      padding-right: 2rem;
+      padding-bottom: 0;
+      padding-left: 1rem; /* Minimal padding for maximum width scaling */
+      padding-right: 1rem;
     }
     
     .video-container-3d {
@@ -388,24 +388,30 @@
       pointer-events: none;
     }
     
-    /* SCROLL TRACK OVERLAY PAGES (Aligned to Center Horizontally and Vertically) */
+    /* SCROLL TRACK OVERLAY PAGES (Aligned to Sides: Left / Right) */
     .scroll-page {
       height: 100vh;
       width: 100%;
       display: flex;
-      align-items: center; /* Center details card vertically */
-      justify-content: center; /* Center details card horizontally */
+      align-items: center; /* Center details vertically */
+      padding: 0 5%;      /* Frame padding from screen edges */
       pointer-events: none;
     }
     
+    /* Alternate slides placement on side edges */
+    #page-1 { justify-content: center; } /* Hero empty space */
+    #page-2 { justify-content: flex-start; } /* Left side */
+    #page-3 { justify-content: flex-end; }   /* Right side */
+    #page-4 { justify-content: flex-start; } /* Left side */
+    
     .page-content {
       width: 100%;
-      max-width: 500px; /* Elegant centered card */
-      padding: 2.5rem 3rem;
+      max-width: 320px; /* Small, compact card size */
+      padding: 1.8rem 2.2rem;
       background: rgba(10, 10, 10, 0.45); /* Translucent glass card background */
       backdrop-filter: blur(25px) saturate(160%); /* Glossy Glassmorphism */
       -webkit-backdrop-filter: blur(25px) saturate(160%);
-      border: 1px solid rgba(223, 188, 138, 0.2); /* Gold glass frame border */
+      border: 1px solid rgba(223, 188, 138, 0.22); /* Gold glass frame border */
       border-radius: 16px;
       box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85),
                   inset 0 1px 0 rgba(255, 255, 255, 0.12); /* Gloss edge highlight reflection */
@@ -425,29 +431,29 @@
     }
     
     .page-num {
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       font-weight: 600;
       color: var(--gold);
       letter-spacing: 0.2em;
       display: block;
-      margin-bottom: 1rem;
+      margin-bottom: 0.8rem;
     }
     
     .page-title {
       font-family: var(--font-body);
-      font-size: clamp(1.8rem, 3vw, 2.3rem);
-      font-weight: 500;
+      font-size: 1.25rem; /* Elegant smaller title font size */
+      font-weight: 600;
       line-height: 1.2;
       color: var(--text-main);
-      margin-bottom: 1.2rem;
-      letter-spacing: 0.02em;
+      margin-bottom: 0.8rem;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
     }
     
     .page-description {
-      font-size: 0.9rem;
+      font-size: 0.8rem; /* Smaller description font size */
       color: var(--text-muted);
-      line-height: 1.6;
+      line-height: 1.5;
       font-weight: 300;
     }
     
@@ -487,6 +493,10 @@
     
     /* RESPONSIVE LAYOUTS */
     @media (max-width: 900px) {
+      .scroll-page {
+        justify-content: center !important;
+        padding: 0 1.5rem;
+      }
       .page-content {
         max-width: 90%;
         padding: 2rem;
@@ -793,7 +803,7 @@
       constructor(x, y, radius) {
         this.x = x;
         this.y = y;
-        this.vx = (Math.random() - 0.5) * 0.3; // Much slower initial speed (slow bounce)
+        this.vx = (Math.random() - 0.5) * 0.3; // Slower initial speed for slow bounce
         this.vy = (Math.random() - 0.5) * 0.3;
         this.radius = radius;
         this.active = true;
@@ -934,7 +944,6 @@
     }, 2500);
     
     function animateCanvas() {
-      // Clear canvas fully
       ctx.clearRect(0, 0, width, height);
       
       const scrollSpeedBoost = 1 + (window.scrollY * 0.002);
@@ -996,7 +1005,6 @@
             const newRadius = Math.sqrt(d1.radius * d1.radius + d2.radius * d2.radius);
             const totalArea = d1.radius * d1.radius + d2.radius * d2.radius;
             
-            // Weighted average position
             d1.x = (d1.x * d1.radius * d1.radius + d2.x * d2.radius * d2.radius) / totalArea;
             d1.y = (d1.y * d1.radius * d1.radius + d2.y * d2.radius * d2.radius) / totalArea;
             
