@@ -199,7 +199,7 @@
       align-items: center;
       pointer-events: none;
       padding-top: var(--header-height);
-      padding-bottom: 13rem; /* Leave room to prevent overlap with bottom centered detail cards */
+      padding-bottom: 0; /* Align directly to bottom border */
       padding-left: 2rem;
       padding-right: 2rem;
     }
@@ -207,8 +207,8 @@
     .video-container-3d {
       width: 100%;
       aspect-ratio: 1284 / 716;
-      max-width: calc((100vh - var(--header-height) - 13rem) * 1284 / 716);
-      max-height: calc(100vh - var(--header-height) - 13rem);
+      max-width: calc((100vh - var(--header-height)) * 1284 / 716);
+      max-height: calc(100vh - var(--header-height));
       background-color: #000000;
       position: relative;
       transform-style: preserve-3d;
@@ -388,21 +388,20 @@
       pointer-events: none;
     }
     
-    /* SCROLL TRACK OVERLAY PAGES (Aligned to Bottom Center) */
+    /* SCROLL TRACK OVERLAY PAGES (Aligned to Center Horizontally and Vertically) */
     .scroll-page {
       height: 100vh;
       width: 100%;
       display: flex;
-      align-items: flex-end; /* Align detail cards to bottom */
-      justify-content: center; /* Center horizontally */
-      padding-bottom: 2.5rem; /* Spacing from screen bottom */
+      align-items: center; /* Center details card vertically */
+      justify-content: center; /* Center details card horizontally */
       pointer-events: none;
     }
     
     .page-content {
       width: 100%;
-      max-width: 580px; /* Slightly wider elegant centered card */
-      padding: 2.2rem 2.8rem;
+      max-width: 500px; /* Elegant centered card */
+      padding: 2.5rem 3rem;
       background: rgba(10, 10, 10, 0.45); /* Translucent glass card background */
       backdrop-filter: blur(25px) saturate(160%); /* Glossy Glassmorphism */
       -webkit-backdrop-filter: blur(25px) saturate(160%);
@@ -497,7 +496,7 @@
       .video-perspective-wrapper {
         padding-left: 1.5rem;
         padding-right: 1.5rem;
-        padding-bottom: 12rem;
+        padding-bottom: 0;
       }
     }
     
@@ -518,10 +517,7 @@
       .video-perspective-wrapper {
         padding-left: 1rem;
         padding-right: 1rem;
-        padding-bottom: 11rem; /* Adjust padding-bottom for mobile layout */
-      }
-      .scroll-page {
-        padding-bottom: 1.5rem;
+        padding-bottom: 0; 
       }
       .page-content {
         max-width: 92%;
@@ -732,7 +728,7 @@
       }
     }
 
-    // 2. SHINY METALLIC FLOWING LINES & ZERO-GRAVITY LIQUID DROPLETS SIMULATION
+    // 2. SHINY METALLIC FLOWING LINES & LAZY ZERO-GRAVITY LIQUID DROPLETS SIMULATION
     const canvas = document.getElementById('flow-canvas');
     const ctx = canvas.getContext('2d');
     
@@ -792,13 +788,13 @@
       });
     }
     
-    // 2B. Droplets Physics Definition
+    // 2B. Droplets Physics Definition (Lazier speeds for slow bouncing)
     class Droplet {
       constructor(x, y, radius) {
         this.x = x;
         this.y = y;
-        this.vx = (Math.random() - 0.5) * 1.0;
-        this.vy = (Math.random() - 0.5) * 1.0;
+        this.vx = (Math.random() - 0.5) * 0.3; // Much slower initial speed (slow bounce)
+        this.vy = (Math.random() - 0.5) * 0.3;
         this.radius = radius;
         this.active = true;
       }
@@ -821,17 +817,17 @@
         if (globalGravityY < 0.05) {
           if (this.x - this.radius < 0) {
             this.x = this.radius;
-            this.vx *= -1;
+            this.vx *= -0.7; // Dampened bounce
           } else if (this.x + this.radius > width) {
             this.x = width - this.radius;
-            this.vx *= -1;
+            this.vx *= -0.7; // Dampened bounce
           }
           if (this.y - this.radius < 0) {
             this.y = this.radius;
-            this.vy *= -1;
+            this.vy *= -0.7; // Dampened bounce
           } else if (this.y + this.radius > height) {
             this.y = height - this.radius;
-            this.vy *= -1;
+            this.vy *= -0.7; // Dampened bounce
           }
         }
         
@@ -847,7 +843,7 @@
               this.split(mouseX, mouseY);
             } else {
               // Slow mouse movement exerts a light push/pull magnetic force
-              const force = (this.radius + 15 - dist) * 0.035;
+              const force = (this.radius + 15 - dist) * 0.015; // Lighter push force
               const angle = Math.atan2(dy, dx);
               this.vx += Math.cos(angle) * force;
               this.vy += Math.sin(angle) * force;
@@ -855,10 +851,10 @@
           }
         }
         
-        // Zero-gravity slow floating sways
+        // Zero-gravity slow floating sways (Lazier drift)
         if (globalGravityY < 0.05) {
-          this.vx += (Math.random() - 0.5) * 0.06;
-          this.vy += (Math.random() - 0.5) * 0.06;
+          this.vx += (Math.random() - 0.5) * 0.015;
+          this.vy += (Math.random() - 0.5) * 0.015;
         }
       }
       
@@ -875,9 +871,9 @@
           
           const drop = new Droplet(rx, ry, Math.max(3, subRadius));
           
-          // Push away from slice point coordinate
+          // Push away from slice point coordinate slowly
           const pushAngle = Math.atan2(ry - mY, rx - mX);
-          const pushForce = 2.5 + Math.random() * 2.5;
+          const pushForce = 0.6 + Math.random() * 0.8; // Slower scattering
           drop.vx = Math.cos(pushAngle) * pushForce;
           drop.vy = Math.sin(pushAngle) * pushForce;
           
@@ -1004,9 +1000,9 @@
             d1.x = (d1.x * d1.radius * d1.radius + d2.x * d2.radius * d2.radius) / totalArea;
             d1.y = (d1.y * d1.radius * d1.radius + d2.y * d2.radius * d2.radius) / totalArea;
             
-            // Momentum conservation speed
-            d1.vx = (d1.vx * d1.radius * d1.radius + d2.vx * d2.radius * d2.radius) / totalArea;
-            d1.vy = (d1.vy * d1.radius * d1.radius + d2.vy * d2.radius * d2.radius) / totalArea;
+            // Momentum conservation speed (multiply by 0.98 for slow dampening)
+            d1.vx = ((d1.vx * d1.radius * d1.radius + d2.vx * d2.radius * d2.radius) / totalArea) * 0.98;
+            d1.vy = ((d1.vy * d1.radius * d1.radius + d2.vy * d2.radius * d2.radius) / totalArea) * 0.98;
             
             d1.radius = Math.min(newRadius, 40); // Cap radius to prevent huge blobs
           }
@@ -1066,7 +1062,7 @@
       let brandOpacity = 1;
       let brandTranslateY = 0;
       
-      // 1. Text fades out completely between scrollPct 0.0 and 0.15
+      // 1. Text and ingredients fade out completely between scrollPct 0.0 and 0.15
       if (scrollPct < 0.15) {
         brandOpacity = 1 - (scrollPct / 0.15);
         brandTranslateY = -scrollPct * 150;
