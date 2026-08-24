@@ -541,7 +541,7 @@
     }
 
     /* STEPPED BLUEPRINT & TECHNICAL CARD OVERLAYS */
-    .blueprint-overlay, .technical-overlay {
+    .technical-overlay {
       position: absolute;
       inset: 0;
       pointer-events: none;
@@ -559,7 +559,7 @@
       transition: opacity 0.5s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
     
-    .blueprint-overlay.active, .technical-overlay.active, .lab-annotations-overlay.active {
+    .technical-overlay.active, .lab-annotations-overlay.active {
       opacity: 1;
       pointer-events: auto;
     }
@@ -578,10 +578,10 @@
     }
     
     /* Wide horizontal line stretch widths to connect shifted left components to right labels */
-    .blueprint-overlay.active .line-cream, .technical-overlay.active .line-cream { width: 42%; }
-    .blueprint-overlay.active .line-splash, .technical-overlay.active .line-splash { width: 46%; }
-    .blueprint-overlay.active .line-boba, .technical-overlay.active .line-boba { width: 50%; }
-    .blueprint-overlay.active .line-cup, .technical-overlay.active .line-cup { width: 46%; }
+    .technical-overlay.active .line-cream { width: 42%; }
+    .technical-overlay.active .line-splash { width: 46%; }
+    .technical-overlay.active .line-boba { width: 50%; }
+    .technical-overlay.active .line-cup { width: 46%; }
     
     .pointer-label {
       position: absolute;
@@ -601,7 +601,6 @@
       left: 64% !important; 
     }
     
-    .blueprint-overlay.active .pointer-label,
     .technical-overlay.active .pointer-label {
       opacity: 0.85;
       transform: translate3d(0, -50%, 0); /* Center on line in active state */
@@ -990,21 +989,6 @@
             <span class="lab-phase-tab" data-phase="2">2</span>
             <span class="lab-phase-tab" data-phase="3">3</span>
             <span class="lab-phase-tab" data-phase="4">4</span>
-          </div>
-
-          <!-- Phase 3: Exploded Layer Blueprint Overlay (Image 3) -->
-          <div class="blueprint-overlay" id="lab-blueprint-layer">
-            <div class="pointer-line line-cream" style="top: 32%; left: 22%;"></div>
-            <span class="pointer-label" style="top: 32%;">4. Whipped Cream Swirl</span>
-
-            <div class="pointer-line line-splash" style="top: 50%; left: 18%;"></div>
-            <span class="pointer-label" style="top: 50%;">3. Rich Taro Milkshake & Splashes</span>
-
-            <div class="pointer-line line-boba" style="top: 68%; left: 14%;"></div>
-            <span class="pointer-label" style="top: 68%;">2. Tapioca Boba Pearls</span>
-
-            <div class="pointer-line line-cup" style="top: 85%; left: 18%;"></div>
-            <span class="pointer-label" style="top: 85%;">1. Transparent Glass Cup</span>
           </div>
 
           <!-- Phase 4: Labeled Technical Axis Overlay (Image 4) -->
@@ -1639,7 +1623,6 @@
     // 5. INTERACTIVE SECTION 2 BLUEPRINT LAB ENGINE (Stepped click deconstruction)
     const labVideo = document.getElementById('lab-video');
     const labCard = document.getElementById('lab-video-card');
-    const labBlueprint = document.getElementById('lab-blueprint-layer');
     const labTechnical = document.getElementById('lab-technical-layer');
     const labAnnotationsOverlay = document.getElementById('lab-annotations');
     const labAnnotationItems = document.querySelectorAll('[id^="lab-ann"]');
@@ -1698,28 +1681,24 @@
         // Image 1: Full glass assembled
         labTargetTime = labVideo.duration;
         labCard.classList.remove('shift-left');
-        labBlueprint.classList.remove('active');
         labTechnical.classList.remove('active');
         labAnnotationsOverlay.classList.remove('active');
       } else if (phase === 2) {
         // Image 2: Active splash explosion deconstructing
         labTargetTime = labVideo.duration * 0.55; // Splash middle frame
         labCard.classList.remove('shift-left');
-        labBlueprint.classList.remove('active');
         labTechnical.classList.remove('active');
         labAnnotationsOverlay.classList.remove('active');
       } else if (phase === 3) {
-        // Image 3: Exploded Layer Blueprint pointer lines (Shifts glass left to leave space on right)
+        // Image 3: Exploded Layer Blueprint (Clean exploded view, no UI lines or labels)
         labTargetTime = 0.05; // Fully separated frame
         labCard.classList.add('shift-left');
-        labBlueprint.classList.add('active');
         labTechnical.classList.remove('active');
         labAnnotationsOverlay.classList.remove('active');
       } else if (phase === 4) {
-        // Image 4: Technical vertical ruler labels (Shifts glass left to leave space on right)
+        // Image 4: Technical vertical ruler labels and interactive dots
         labTargetTime = 0.05; // Keep fully separated frame
         labCard.classList.add('shift-left');
-        labBlueprint.classList.remove('active');
         labTechnical.classList.add('active');
         labAnnotationsOverlay.classList.add('active'); // Fade in annotation dots
       }
