@@ -1507,7 +1507,7 @@
       heroBrandContainer.style.transform = `translateY(${brandTranslateY}px)`;
       heroBrandContainer.style.pointerEvents = brandOpacity > 0.1 ? 'auto' : 'none';
       
-      // 3B. PROGRAMMATIC TEXT SCROLL FADE-IN (No lag/stutter, Velvet Fusion appears slowly after 2nd scroll)
+      // 3B. PROGRAMMATIC TEXT SCROLL FADE-IN (Wider visible ranges for slow reading)
       pages.forEach((page, index) => {
         if (index === 0) return; // Skip content-1 (hero spacer)
         
@@ -1515,36 +1515,36 @@
         let cardTranslateY = 30;
         
         if (index === 1) {
-          // Velvet Fusion (Page 2): active from 0.22 to 0.48
-          if (scrollPct > 0.22 && scrollPct < 0.48) {
-            // Fade in slowly from 0.22 to 0.35, then fade out from 0.40 to 0.48
-            if (scrollPct < 0.35) {
-              cardOpacity = (scrollPct - 0.22) / 0.13;
-            } else if (scrollPct > 0.40) {
-              cardOpacity = 1 - (scrollPct - 0.40) / 0.08;
+          // Velvet Fusion (Page 2): active from 0.20 to 0.52 (increased read duration)
+          if (scrollPct > 0.20 && scrollPct < 0.52) {
+            if (scrollPct < 0.30) {
+              cardOpacity = (scrollPct - 0.20) / 0.10; // fade in slowly
+            } else if (scrollPct > 0.46) {
+              cardOpacity = 1 - (scrollPct - 0.46) / 0.06; // fade out slowly
             } else {
-              cardOpacity = 1;
+              cardOpacity = 1; // stays solid for 16% of scroll depth!
             }
           }
         } else if (index === 2) {
-          // Starch meets Flora (Page 3): active from 0.48 to 0.75
-          if (scrollPct > 0.48 && scrollPct < 0.75) {
+          // Starch meets Flora (Page 3): active from 0.52 to 0.80 (increased read duration)
+          if (scrollPct > 0.52 && scrollPct < 0.80) {
             if (scrollPct < 0.60) {
-              cardOpacity = (scrollPct - 0.48) / 0.12;
-            } else if (scrollPct > 0.68) {
-              cardOpacity = 1 - (scrollPct - 0.68) / 0.07;
+              cardOpacity = (scrollPct - 0.52) / 0.08;
+            } else if (scrollPct > 0.74) {
+              cardOpacity = 1 - (scrollPct - 0.74) / 0.06;
             } else {
-              cardOpacity = 1;
+              cardOpacity = 1; // stays solid for 14% of scroll depth!
             }
           }
         } else if (index === 3) {
-          // Pure Elements (Page 4): active from 0.75 to 1.0
-          if (scrollPct > 0.75) {
-            if (scrollPct > 0.90) {
-              // Fade out slowly past 0.90 so the card doesn't hang in the transition
-              cardOpacity = 1 - (scrollPct - 0.90) / 0.08; 
+          // Pure Elements (Page 4): active from 0.80 to 1.0 (increased read duration)
+          if (scrollPct > 0.80) {
+            if (scrollPct < 0.88) {
+              cardOpacity = (scrollPct - 0.80) / 0.08;
+            } else if (scrollPct > 0.94) {
+              cardOpacity = 1 - (scrollPct - 0.94) / 0.06;
             } else {
-              cardOpacity = (scrollPct - 0.75) / 0.15;
+              cardOpacity = 1; // stays solid for 6% of scroll depth!
             }
           }
         }
