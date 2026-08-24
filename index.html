@@ -100,14 +100,14 @@
       transition: width 0.4s ease-out;
     }
     
-    /* SHINY HORIZONTAL FLOWING LINES CANVAS */
+    /* BACKGROUND CANVAS FOR FLOW LINES AND LIQUID PHYSICS DROPLETS */
     #flow-canvas {
       position: fixed;
       inset: 0;
       width: 100vw;
       height: 100vh;
-      z-index: 0; /* Sits in background behind video card */
-      pointer-events: none;
+      z-index: 0; /* In background behind video viewport */
+      pointer-events: auto; /* Active pointer-events for physics droplet slicing */
       background-color: #000000;
     }
     
@@ -379,76 +379,6 @@
       filter: drop-shadow(0 0 25px rgba(223, 188, 138, 0.25));
     }
     
-    /* FLOATING INGREDIENT BLUEPRINTS CONTAINER */
-    .hero-ingredients-container {
-      position: fixed;
-      inset: 0;
-      z-index: 9; /* Sits below the brand title but above the background */
-      pointer-events: none;
-    }
-    
-    .hero-ingredient {
-      position: absolute;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      filter: drop-shadow(0 0 8px rgba(223, 188, 138, 0.15));
-      left: 50%;
-      top: 50%;
-      opacity: var(--ing-opacity, 1);
-      
-      /* Map start coordinates and calculate scroll convergence */
-      transform: translate3d(
-        calc(var(--start-x) * (1 - var(--converge, 0))),
-        calc(var(--start-y) * (1 - var(--converge, 0))),
-        0
-      ) scale(calc(1 - var(--converge, 0)));
-    }
-    
-    /* Starting margin offsets relative to screen center */
-    #ing-taro { --start-x: -32vw; --start-y: -22vh; }
-    #ing-leaf { --start-x: 28vw; --start-y: -18vh; }
-    #ing-boba { --start-x: -26vw; --start-y: 20vh; }
-    #ing-cream { --start-x: 30vw; --start-y: 24vh; }
-    
-    /* Separate floating animations on inner SVGs to prevent transform conflicts */
-    .hero-ingredient svg {
-      transition: transform 0.3s ease;
-    }
-    #ing-taro svg { animation: floatSlow1 14s infinite ease-in-out; }
-    #ing-leaf svg { animation: floatSlow2 16s infinite ease-in-out; }
-    #ing-boba svg { animation: floatSlow3 11s infinite ease-in-out; }
-    #ing-cream svg { animation: floatSlow4 15s infinite ease-in-out; }
-    
-    .ing-label {
-      font-size: 0.6rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--gold-dark);
-      font-weight: 500;
-      opacity: 0.7;
-      text-align: center;
-    }
-    
-    /* FLOATING ANIMATIONS FOR INGREDIENTS */
-    @keyframes floatSlow1 {
-      0%, 100% { transform: translate(0, 0) rotate(0deg); }
-      50% { transform: translate(-8px, -12px) rotate(-5deg); }
-    }
-    @keyframes floatSlow2 {
-      0%, 100% { transform: translate(0, 0) rotate(0deg); }
-      50% { transform: translate(12px, -8px) rotate(8deg); }
-    }
-    @keyframes floatSlow3 {
-      0%, 100% { transform: translate(0, 0) rotate(0deg); }
-      50% { transform: translate(-6px, 10px) rotate(6deg); }
-    }
-    @keyframes floatSlow4 {
-      0%, 100% { transform: translate(0, 0) rotate(0deg); }
-      50% { transform: translate(10px, 6px) rotate(-4deg); }
-    }
-    
     /* SCROLL TRACK HEIGHT SPACER FOR MAPPING */
     .scroll-track-container {
       position: relative;
@@ -573,10 +503,6 @@
       header { padding: 1.5rem; }
       .annotation-card { width: 200px; padding: 0.8rem 1rem; }
       .video-perspective-wrapper { padding-left: 1.5rem; padding-right: 1.5rem; }
-      #ing-taro { --start-x: -35vw; --start-y: -25vh; }
-      #ing-leaf { --start-x: 35vw; --start-y: -25vh; }
-      #ing-boba { --start-x: -30vw; --start-y: 22vh; }
-      #ing-cream { --start-x: 30vw; --start-y: 22vh; }
     }
     
     @media (max-width: 600px) {
@@ -593,13 +519,6 @@
       .card-title { font-size: 0.85rem; }
       .card-text { font-size: 0.7rem; }
       .video-perspective-wrapper { padding-left: 1rem; padding-right: 1rem; }
-      
-      /* Bring ingredients closer on very narrow phone screens */
-      #ing-taro { --start-x: -38vw; --start-y: -30vh; }
-      #ing-leaf { --start-x: 38vw; --start-y: -30vh; }
-      #ing-boba { --start-x: -34vw; --start-y: 28vh; }
-      #ing-cream { --start-x: 34vw; --start-y: 28vh; }
-      .ing-label { font-size: 0.5rem; }
     }
   </style>
 </head>
@@ -707,54 +626,6 @@
     <h1 class="hero-brand">Taro Bliss</h1>
   </div>
 
-  <!-- FLOATING INGREDIENT BLUEPRINTS -->
-  <div class="hero-ingredients-container">
-    <!-- Taro Root (Top-Left) -->
-    <div class="hero-ingredient" id="ing-taro">
-      <svg viewBox="0 0 100 100" width="75" height="75">
-        <path d="M 20 50 C 15 25, 75 15, 85 40 C 95 65, 35 85, 20 50 Z" stroke="var(--gold)" stroke-width="1.2" fill="none" />
-        <path d="M 32 32 Q 52 45 74 35" stroke="var(--gold)" stroke-width="0.8" fill="none" opacity="0.6" />
-        <path d="M 25 52 Q 55 65 82 58" stroke="var(--gold)" stroke-width="0.8" fill="none" opacity="0.6" />
-        <path d="M 30 70 Q 50 78 70 73" stroke="var(--gold)" stroke-width="0.8" fill="none" opacity="0.6" />
-        <circle cx="50" cy="50" r="1.5" fill="var(--gold)" opacity="0.8" />
-        <circle cx="42" cy="45" r="1" fill="var(--gold)" opacity="0.8" />
-      </svg>
-      <span class="ing-label">Taro Root</span>
-    </div>
-
-    <!-- Jasmine Tea Leaf (Top-Right) -->
-    <div class="hero-ingredient" id="ing-leaf">
-      <svg viewBox="0 0 100 100" width="75" height="75">
-        <path d="M 15 65 C 35 35, 65 25, 85 15 C 65 45, 45 75, 15 65 Z" stroke="var(--gold)" stroke-width="1.2" fill="none" />
-        <path d="M 15 65 C 40 50, 65 30, 85 15" stroke="var(--gold)" stroke-width="0.8" fill="none" opacity="0.7" />
-        <path d="M 38 52 C 38 45, 48 40, 58 37" stroke="var(--gold)" stroke-width="0.6" fill="none" opacity="0.5" />
-        <path d="M 54 41 C 54 34, 64 29, 74 26" stroke="var(--gold)" stroke-width="0.6" fill="none" opacity="0.5" />
-      </svg>
-      <span class="ing-label">Jasmine Tea</span>
-    </div>
-
-    <!-- Tapioca Pearl (Bottom-Left) -->
-    <div class="hero-ingredient" id="ing-boba">
-      <svg viewBox="0 0 100 100" width="80" height="80">
-        <circle cx="50" cy="50" r="30" stroke="var(--gold)" stroke-width="1.2" fill="none" />
-        <path d="M 32 30 A 22 22 0 0 1 68 30" stroke="var(--gold)" stroke-width="0.8" fill="none" opacity="0.6" />
-        <path d="M 28 42 A 22 22 0 0 0 38 68" stroke="var(--gold)" stroke-width="0.8" fill="none" opacity="0.6" />
-        <circle cx="55" cy="45" r="2.5" fill="var(--gold)" opacity="0.8" />
-      </svg>
-      <span class="ing-label">Tapioca Pearl</span>
-    </div>
-
-    <!-- Whipped Cream Dollop (Bottom-Right) -->
-    <div class="hero-ingredient" id="ing-cream">
-      <svg viewBox="0 0 100 100" width="75" height="75">
-        <path d="M 50 15 C 62 15, 75 28, 75 45 C 75 62, 58 75, 50 85 C 42 75, 25 62, 25 45 C 25 28, 38 15, 50 15 Z" stroke="var(--gold)" stroke-width="1.2" fill="none" />
-        <path d="M 50 32 C 58 35, 62 45, 58 55 C 52 65, 48 65, 42 55 C 38 45, 42 35, 50 32 Z" stroke="var(--gold)" stroke-width="0.8" fill="none" opacity="0.6" />
-        <path d="M 50 15 C 55 32, 55 68, 50 85" stroke="var(--gold)" stroke-width="0.8" fill="none" opacity="0.6" />
-      </svg>
-      <span class="ing-label">Whipped Cream</span>
-    </div>
-  </div>
-
   <!-- SCROLL INDICATOR -->
   <div class="scroll-hint" id="scroll-hint">
     <span class="scroll-text">Scroll to dissect</span>
@@ -853,18 +724,51 @@
       }
     }
 
-    // 2. SHINY METALLIC FLOWING CANVAS LINES ENGINE (Background Pattern)
+    // 2. SHINY METALLIC FLOWING LINES & ZERO-GRAVITY LIQUID DROPLETS SIMULATION
     const canvas = document.getElementById('flow-canvas');
     const ctx = canvas.getContext('2d');
     
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
     
+    // Global interaction variables
+    let mouseX = null;
+    let mouseY = null;
+    let lastMouseX = null;
+    let lastMouseY = null;
+    let mouseSpeed = 0;
+    let globalGravityY = 0; // Dynamic gravity pull driven by scroll progress
+    let globalDropletsOpacity = 1; // Fades out as droplets fall down
+    
     window.addEventListener('resize', () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
     });
     
+    // Track mouse speed for slicing droplets
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      
+      if (lastMouseX !== null && lastMouseY !== null) {
+        const dx = mouseX - lastMouseX;
+        const dy = mouseY - lastMouseY;
+        mouseSpeed = Math.sqrt(dx * dx + dy * dy);
+      }
+      
+      lastMouseX = mouseX;
+      lastMouseY = mouseY;
+    });
+    
+    window.addEventListener('mouseleave', () => {
+      mouseX = null;
+      mouseY = null;
+      lastMouseX = null;
+      lastMouseY = null;
+      mouseSpeed = 0;
+    });
+    
+    // 2A. Translucent Flow Lines configuration
     const lines = [];
     const lineCount = 14;
     
@@ -880,25 +784,171 @@
       });
     }
     
-    function animateLines() {
+    // 2B. Droplets Physics Definition
+    class Droplet {
+      constructor(x, y, radius) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 1.0;
+        this.vy = (Math.random() - 0.5) * 1.0;
+        this.radius = radius;
+        this.active = true;
+      }
+      
+      update() {
+        if (!this.active) return;
+        
+        // Move droplet
+        this.x += this.vx;
+        this.y += this.vy;
+        
+        // Apply down-gravity driven by scroll
+        this.vy += globalGravityY;
+        
+        // Gentle friction/damping to prevent speeds from compounding out of bounds
+        this.vx *= 0.99;
+        this.vy *= 0.99;
+        
+        // Handle bounding box reflections (only active at top scroll, otherwise let them fall off)
+        if (globalGravityY < 0.05) {
+          if (this.x - this.radius < 0) {
+            this.x = this.radius;
+            this.vx *= -1;
+          } else if (this.x + this.radius > width) {
+            this.x = width - this.radius;
+            this.vx *= -1;
+          }
+          if (this.y - this.radius < 0) {
+            this.y = this.radius;
+            this.vy *= -1;
+          } else if (this.y + this.radius > height) {
+            this.y = height - this.radius;
+            this.vy *= -1;
+          }
+        }
+        
+        // Mouse slice / splitting interaction
+        if (mouseX !== null && mouseY !== null) {
+          const dx = this.x - mouseX;
+          const dy = this.y - mouseY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          if (dist < this.radius + 15) {
+            // Slice if mouse is slicing fast and droplet is large enough
+            if (mouseSpeed > 9 && this.radius > 8) {
+              this.split(mouseX, mouseY);
+            } else {
+              // Slow mouse movement exerts a light push/pull magnetic force
+              const force = (this.radius + 15 - dist) * 0.035;
+              const angle = Math.atan2(dy, dx);
+              this.vx += Math.cos(angle) * force;
+              this.vy += Math.sin(angle) * force;
+            }
+          }
+        }
+        
+        // Zero-gravity slow floating sways
+        if (globalGravityY < 0.05) {
+          this.vx += (Math.random() - 0.5) * 0.06;
+          this.vy += (Math.random() - 0.5) * 0.06;
+        }
+      }
+      
+      split(mX, mY) {
+        this.active = false;
+        const count = 2 + Math.floor(Math.random() * 2);
+        const subRadius = this.radius / Math.sqrt(count);
+        
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const offset = this.radius * 0.35;
+          const rx = this.x + Math.cos(angle) * offset;
+          const ry = this.y + Math.sin(angle) * offset;
+          
+          const drop = new Droplet(rx, ry, Math.max(3, subRadius));
+          
+          // Push away from slice point coordinate
+          const pushAngle = Math.atan2(ry - mY, rx - mX);
+          const pushForce = 2.5 + Math.random() * 2.5;
+          drop.vx = Math.cos(pushAngle) * pushForce;
+          drop.vy = Math.sin(pushAngle) * pushForce;
+          
+          droplets.push(drop);
+        }
+      }
+      
+      draw() {
+        if (!this.active) return;
+        
+        ctx.save();
+        ctx.shadowColor = `rgba(223, 188, 138, ${0.45 * globalDropletsOpacity})`;
+        ctx.shadowBlur = 10;
+        
+        // Specular gold 3D radial gradient reflection
+        const grad = ctx.createRadialGradient(
+          this.x - this.radius * 0.25, 
+          this.y - this.radius * 0.25, 
+          this.radius * 0.05, 
+          this.x, 
+          this.y, 
+          this.radius
+        );
+        grad.addColorStop(0, `rgba(255, 255, 255, ${globalDropletsOpacity})`); // Speclar shine white
+        grad.addColorStop(0.25, `rgba(243, 229, 171, ${globalDropletsOpacity})`); // Light cream gold
+        grad.addColorStop(0.7, `rgba(223, 188, 138, ${globalDropletsOpacity})`); // Gold
+        grad.addColorStop(1, `rgba(138, 111, 39, ${globalDropletsOpacity})`); // Dark bronze gold edge
+        
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+    
+    // Spawn initial droplet swarm
+    const droplets = [];
+    const initialCount = 35;
+    for (let i = 0; i < initialCount; i++) {
+      droplets.push(new Droplet(
+        Math.random() * width,
+        Math.random() * height,
+        6 + Math.random() * 14 // random radius
+      ));
+    }
+    
+    // Slow droplet spawn regenerator to preserve playground feel over time
+    setInterval(() => {
+      // Spawn new droplets slowly only at top scroll and when count drops
+      if (window.scrollY < 20 && droplets.filter(d => d.active).length < 25) {
+        droplets.push(new Droplet(
+          Math.random() * width,
+          Math.random() * height,
+          4 + Math.random() * 6
+        ));
+      }
+    }, 2500);
+    
+    function animateCanvas() {
+      // Clear canvas fully
       ctx.clearRect(0, 0, width, height);
       
       const scrollSpeedBoost = 1 + (window.scrollY * 0.002);
       
-      // Specular light metallic gradient for gold wires
-      const grad = ctx.createLinearGradient(0, 0, width, 0);
-      grad.addColorStop(0, '#8a6f27');
-      grad.addColorStop(0.2, '#dfbc8a');
-      grad.addColorStop(0.4, '#ffffff'); // Specular shine highlight
-      grad.addColorStop(0.5, '#f3e5ab');
-      grad.addColorStop(0.7, '#dfbc8a');
-      grad.addColorStop(1, '#8a6f27');
+      // 1. DRAW SUBTLE TRANSLUCENT BACKGROUND FLOW LINES
+      const lineGrad = ctx.createLinearGradient(0, 0, width, 0);
+      lineGrad.addColorStop(0, '#8a6f27');
+      lineGrad.addColorStop(0.2, '#dfbc8a');
+      lineGrad.addColorStop(0.4, '#ffffff');
+      lineGrad.addColorStop(0.5, '#f3e5ab');
+      lineGrad.addColorStop(0.7, '#dfbc8a');
+      lineGrad.addColorStop(1, '#8a6f27');
       
       lines.forEach(line => {
         line.phase += line.speed * scrollSpeedBoost;
         
         ctx.beginPath();
-        ctx.strokeStyle = grad;
+        ctx.strokeStyle = lineGrad;
         ctx.lineWidth = line.width;
         ctx.shadowColor = 'rgba(223, 188, 138, 0.2)';
         ctx.shadowBlur = 4;
@@ -918,9 +968,51 @@
         ctx.stroke();
       });
       
-      requestAnimationFrame(animateLines);
+      // 2. DRAW & MERGE METABALLS PHYSICS DROPLETS
+      // Double loop collision check to merge droplets
+      for (let i = 0; i < droplets.length; i++) {
+        const d1 = droplets[i];
+        if (!d1.active) continue;
+        
+        for (let j = i + 1; j < droplets.length; j++) {
+          const d2 = droplets[j];
+          if (!d2.active) continue;
+          
+          const dx = d2.x - d1.x;
+          const dy = d2.y - d1.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          if (dist < d1.radius + d2.radius) {
+            // Collision! Absorb j into i (conservation of mass area & momentum)
+            d2.active = false;
+            
+            const newRadius = Math.sqrt(d1.radius * d1.radius + d2.radius * d2.radius);
+            const totalArea = d1.radius * d1.radius + d2.radius * d2.radius;
+            
+            // Weighted average position
+            d1.x = (d1.x * d1.radius * d1.radius + d2.x * d2.radius * d2.radius) / totalArea;
+            d1.y = (d1.y * d1.radius * d1.radius + d2.y * d2.radius * d2.radius) / totalArea;
+            
+            // Momentum conservation speed
+            d1.vx = (d1.vx * d1.radius * d1.radius + d2.vx * d2.radius * d2.radius) / totalArea;
+            d1.vy = (d1.vy * d1.radius * d1.radius + d2.vy * d2.radius * d2.radius) / totalArea;
+            
+            d1.radius = Math.min(newRadius, 40); // Cap radius to prevent huge blobs
+          }
+        }
+      }
+      
+      // Update and Draw active droplets
+      droplets.forEach(d => {
+        if (d.active) {
+          d.update();
+          d.draw();
+        }
+      });
+      
+      requestAnimationFrame(animateCanvas);
     }
-    animateLines();
+    animateCanvas();
 
     // 3. VIDEO SCROLL-SCRUBBING ENGINE & TRANSITION CONTROLLER
     const scrollSection = document.getElementById('scroll-section');
@@ -962,27 +1054,26 @@
       let videoOpacity = 0;
       let brandOpacity = 1;
       let brandTranslateY = 0;
-      let convergeVal = 0;
       
-      // 1. Text and ingredients fade out completely between scrollPct 0.0 and 0.15
+      // 1. Text fades out completely between scrollPct 0.0 and 0.15
       if (scrollPct < 0.15) {
         brandOpacity = 1 - (scrollPct / 0.15);
         brandTranslateY = -scrollPct * 150;
         videoOpacity = 0; // Strictly ensure video is invisible while text is fading
-        convergeVal = scrollPct / 0.15;
+        
+        // Gravity is zero, droplets drift float freely
+        globalGravityY = 0;
+        globalDropletsOpacity = 1;
       } else {
         brandOpacity = 0;
         brandTranslateY = -150;
         videoOpacity = 0;
-        convergeVal = 1;
+        
+        // Introduce down gravity and fade droplets as you scroll past the text (0.15 to 0.20)
+        const transitionProgress = Math.min(1, (scrollPct - 0.15) / 0.05);
+        globalGravityY = transitionProgress * 0.8; // gravity pulls droplets downwards
+        globalDropletsOpacity = 1 - transitionProgress; // droplets dissolve
       }
-      
-      // Update ingredients properties
-      const ingredients = document.querySelectorAll('.hero-ingredient');
-      ingredients.forEach(item => {
-        item.style.setProperty('--converge', convergeVal);
-        item.style.setProperty('--ing-opacity', brandOpacity);
-      });
       
       // 2. Video glass card only starts showing up AFTER text/ingredients are completely gone (from 0.20 to 0.40)
       if (scrollPct > 0.20) {
