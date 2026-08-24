@@ -634,6 +634,36 @@
       animation: pulseFooter 2.5s infinite ease-in-out;
     }
     
+    /* Click to dissect tag in the top right corner of the box */
+    .lab-click-tag {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      z-index: 25;
+      background: rgba(223, 188, 138, 0.12);
+      border: 1px solid rgba(223, 188, 138, 0.35);
+      border-radius: 4px;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.55rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 600;
+      pointer-events: none;
+      animation: pulseTag 2.2s infinite ease-in-out;
+    }
+    
+    @keyframes pulseTag {
+      0%, 100% { 
+        opacity: 0.75; 
+        box-shadow: 0 0 0 0 rgba(223, 188, 138, 0); 
+      }
+      50% { 
+        opacity: 1; 
+        box-shadow: 0 0 12px 2px rgba(223, 188, 138, 0.25); 
+      }
+    }
+    
     @keyframes pulseFooter {
       0%, 100% { opacity: 0.7; }
       50% { opacity: 1; border-color: rgba(223, 188, 138, 0.4); }
@@ -903,6 +933,9 @@
         <div class="lab-video-card" id="lab-video-card">
           <video id="lab-video" src="clean_video.mp4" playsinline muted preload="auto"></video>
           
+          <!-- Small Click Tag Indication in the Box -->
+          <div class="lab-click-tag">Click</div>
+
           <!-- Phase Status Indicator -->
           <div class="lab-card-footer" id="lab-phase-status">Phase 1: Assembled</div>
 
@@ -1425,8 +1458,14 @@
         globalDropletsOpacity = 0;
       }
       
+      // Video glass card shows up between 0.20 and 0.40, and fades out slowly past 0.90
+      // to let the new lab section rise smoothly from underneath
       if (scrollPct > 0.20) {
-        videoOpacity = (scrollPct - 0.20) / 0.20;
+        if (scrollPct > 0.90) {
+          videoOpacity = 1 - (scrollPct - 0.90) / 0.08; // smooth fade-out
+        } else {
+          videoOpacity = (scrollPct - 0.20) / 0.20;
+        }
         videoOpacity = Math.max(0, Math.min(1, videoOpacity));
       } else {
         videoOpacity = 0;
@@ -1557,6 +1596,30 @@
     const labStatusText = document.getElementById('lab-phase-status');
     const labAnnotationItems = document.querySelectorAll('[id^="lab-ann"]');
     
+    // Scroll reveal hooks for Lab Section
+    const labSection = document.getElementById('lab-section');
+    const labContainer = document.querySelector('.lab-container');
+    
+    // Initialize lab reveal styles
+    labContainer.style.opacity = '0';
+    labContainer.style.transform = 'translateY(60px) scale(0.98)';
+    labContainer.style.transition = 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)';
+    
+    // Dynamic scroll reveal trigger to resolve "abrupt popping"
+    window.addEventListener('scroll', () => {
+      const labRect = labSection.getBoundingClientRect();
+      const triggerY = window.innerHeight * 0.85; // triggers when top of section is 85% down the viewport
+      
+      if (labRect.top < triggerY) {
+        const progress = Math.min(1, (triggerY - labRect.top) / (window.innerHeight * 0.4));
+        labContainer.style.opacity = progress;
+        labContainer.style.transform = `translateY(${60 * (1 - progress)}px) scale(${0.98 + 0.02 * progress})`;
+      } else {
+        labContainer.style.opacity = '0';
+        labContainer.style.transform = 'translateY(60px) scale(0.98)';
+      }
+    });
+
     let labTargetTime = 0;
     let labCurrentTime = 0;
     let labCurrentPhase = 1; // 1: Assembled, 2: Deconstructing, 3: Blueprint, 4: Technical
