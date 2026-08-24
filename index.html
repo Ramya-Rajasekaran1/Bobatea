@@ -779,7 +779,7 @@
         amplitude: 40 + Math.random() * 80,
         wavelength: 0.0006 + Math.random() * 0.0012,
         phase: Math.random() * Math.PI * 2,
-        opacity: 0.01 + Math.random() * 0.02, // Fully translucent background wires
+        opacity: 0.20, // Set to exactly 20% opacity as requested
         width: 0.3 + Math.random() * 0.4 // 0.3px to 0.7px ultra-thin lines
       });
     }
@@ -947,6 +947,9 @@
       lines.forEach(line => {
         line.phase += line.speed * scrollSpeedBoost;
         
+        ctx.save();
+        ctx.globalAlpha = line.opacity; // Applies the 20% opacity to the specular gradient stroke
+        
         ctx.beginPath();
         ctx.strokeStyle = lineGrad;
         ctx.lineWidth = line.width;
@@ -966,6 +969,7 @@
           }
         }
         ctx.stroke();
+        ctx.restore(); // Resets opacity back to 100% for other elements
       });
       
       // 2. DRAW & MERGE METABALLS PHYSICS DROPLETS
