@@ -531,11 +531,11 @@
       pointer-events: none;
       display: block;
       
-      /* Smooth translation when shifting left in Phase 3/4 */
+      /* Smooth translation when shifting left in Phase 4 */
       transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
     
-    /* SHIFT GLASS VIDEO AND ANNOTATIONS TO THE LEFT IN PHASE 3/4 */
+    /* SHIFT GLASS VIDEO AND ANNOTATIONS TO THE LEFT IN PHASE 4 */
     .lab-video-card.shift-left video {
       transform: translate3d(-18%, 0, 0) scale(1.02);
     }
@@ -1680,25 +1680,25 @@
       if (phase === 1) {
         // Image 1: Full glass assembled
         labTargetTime = labVideo.duration;
-        labCard.classList.remove('shift-left');
+        labCard.classList.remove('shift-left'); // Centered
         labTechnical.classList.remove('active');
         labAnnotationsOverlay.classList.remove('active');
       } else if (phase === 2) {
         // Image 2: Active splash explosion deconstructing
         labTargetTime = labVideo.duration * 0.55; // Splash middle frame
-        labCard.classList.remove('shift-left');
+        labCard.classList.remove('shift-left'); // Centered
         labTechnical.classList.remove('active');
         labAnnotationsOverlay.classList.remove('active');
       } else if (phase === 3) {
-        // Image 3: Exploded Layer Blueprint (Clean exploded view, no UI lines or labels)
+        // Image 3: Exploded Layer Blueprint (Clean exploded view, centered)
         labTargetTime = 0.05; // Fully separated frame
-        labCard.classList.add('shift-left');
+        labCard.classList.remove('shift-left'); // Centered
         labTechnical.classList.remove('active');
         labAnnotationsOverlay.classList.remove('active');
       } else if (phase === 4) {
-        // Image 4: Technical vertical ruler labels and interactive dots
+        // Image 4: Technical vertical ruler labels and interactive dots (Shifts glass left)
         labTargetTime = 0.05; // Keep fully separated frame
-        labCard.classList.add('shift-left');
+        labCard.classList.add('shift-left'); // Shifted left only on 4th!
         labTechnical.classList.add('active');
         labAnnotationsOverlay.classList.add('active'); // Fade in annotation dots
       }
